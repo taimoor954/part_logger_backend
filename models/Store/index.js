@@ -38,17 +38,18 @@ const storeSchema = new Schema(
     storeName: {
       type: String,
       required: true,
+      trim: true,
     },
     storeAddress: {
       type: addressSchema,
       required: true,
     },
-    seller: {
+    sellers: {
       type: [workerSchema],
       required: false,
       default: [],
     },
-    mechanic: {
+    mechanics: {
       type: [workerSchema],
       required: false,
       default: [],
