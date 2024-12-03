@@ -7,10 +7,11 @@ const {
   updateStore,
   getStoresByUser,
 } = require("../../controllers/store");
+const { addStoreValidator } = require("../../validators/storeValidators");
 
 const router = express.Router();
 
-router.post("/addStore", userRoute, addStore);
+router.post("/addStore", userRoute, addStoreValidator, addStore);
 router.get("/getStore/:storeId", userRoute, getStore);
 router.put("/updateStore/:storeId", userRoute, updateStore);
 router.post("/addWorkers/:storeId", userRoute, addWorker);
