@@ -46,7 +46,7 @@ exports.adminRoute = async (req, res, next) => {
     if (!decoded.isAdmin) {
       return res
         .status(401)
-        .json(ApiResponse({}, "Unauthorized Access", false));
+        .json(ApiResponse(decoded.isAdmin, "Unauthorized Access", false));
     }
     let admin = await User.findById(decoded._id).select("-password");
     if (!admin) {

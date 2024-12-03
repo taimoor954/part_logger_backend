@@ -18,7 +18,7 @@ const subscriptionSchema = new Schema(
       type: Number,
       required: true,
     },
-    allowedVehicles: {
+    vehicleLimit: {
       type: Number,
       required: true,
     },

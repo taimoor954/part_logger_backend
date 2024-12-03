@@ -6,7 +6,8 @@ const fs = require("fs");
 
 // Signup Controller
 exports.register = async (req, res) => {
-  const { firstName, lastName, email, password, phone, gender } = req.body;
+  const { firstName, lastName, email, password, phone, gender, isAdmin } =
+    req.body;
   try {
     let user = await User.findOne({ email });
     if (user) {
@@ -24,6 +25,7 @@ exports.register = async (req, res) => {
       lastName,
       gender,
       phone,
+      isAdmin: isAdmin ? isAdmin : false,
     });
 
     if (req.body.image) {
@@ -92,7 +94,6 @@ exports.updateProfile = async (req, res) => {
     updated.phone = req.body.phone ? req.body.phone : user.phone;
     updated.gender = req.body.gender ? req.body.gender : user?.gender;
 
-    
     if (req.body.image) {
       if (user.image !== "") {
         const filePath = `./Uploads/${user.image}`;
