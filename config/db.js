@@ -3,8 +3,8 @@ require("dotenv").config();
 
 const { NODE_ENV, DB_LOCAL, DB_CUSTOMDEV, DB_ATLAS } = process.env;
 const DB = {
-  // development: DB_LOCAL,
-  development: DB_CUSTOMDEV,
+  development: DB_LOCAL,
+  // development: DB_CUSTOMDEV,
   customdev: DB_CUSTOMDEV,
   live: DB_LOCAL,
 };
