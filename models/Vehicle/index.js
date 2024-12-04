@@ -107,7 +107,7 @@ const vehicleSchema = new Schema(
       enum: ["ACTIVE", "INACTIVE"],
       default: "ACTIVE",
     },
-    images: {
+    gallery: {
       type: [String],
       required: true,
     },

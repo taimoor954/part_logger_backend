@@ -43,6 +43,11 @@ const repairPartDetailsSchema = new Schema(
 
 const repairSchema = new Schema(
   {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     vehicleId: {
       type: Schema.Types.ObjectId,
       ref: "Vehicle",

@@ -72,7 +72,7 @@ const uploadMultiple = multer({
 });
 exports.uploadMultiple = uploadMultiple.fields([
   { name: "image", maxCount: 1 },
-  //   { name: "gallery", maxCount: 10 },
+    { name: "gallery", maxCount: 10 },
   //   { name: "licenseFront", maxCount: 1 },
   //   { name: "licenseBack", maxCount: 1 },
 ]);

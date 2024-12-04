@@ -44,10 +44,6 @@ const userSchema = new Schema(
       enum: ["ACTIVE", "INACTIVE"],
       default: "ACTIVE",
     },
-    subscriptionId: {
-      type: Schema.Types.ObjectId,
-      ref: "Subscription",
-    },
   },
   {
     timestamps: true,

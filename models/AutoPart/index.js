@@ -27,10 +27,10 @@ const partDetailsSchema = new Schema({
     type: String,
   },
   warrantyManufacture: {
-    type: Number,
+    type: Number, // in months
   },
   extendedWarranty: {
-    type: Number,
+    type: Number, // in years
   },
   extendedWarrantyPrice: {
     type: Number,
@@ -45,12 +45,17 @@ const partDetailsSchema = new Schema({
 
 const autoPartSchema = new Schema(
   {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     vehicleId: {
       type: Schema.Types.ObjectId,
       ref: "Vehicle",
       required: true,
     },
-    store: {
+    storeId: {
       type: Schema.Types.ObjectId,
       ref: "Store",
       required: true,
