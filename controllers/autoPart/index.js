@@ -9,6 +9,7 @@ const Store = require("../../models/Store");
 const Vehicle = require("../../models/Vehicle");
 const moment = require("moment");
 const fs = require("fs");
+const { default: mongoose } = require("mongoose");
 
 exports.addAutoPart = async (req, res) => {
   const {
@@ -186,6 +187,118 @@ exports.updateAutoPart = async (req, res) => {
       .json(ApiResponse(autoPart, "Auto part updated successfully", true));
   } catch (error) {
     console.error("Error updating auto part:", error.message);
+    return res.status(500).json(ApiResponse({}, error.message, false));
+  }
+};
+
+exports.getAutoPart = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const autoPart = await AutoPart.findOne({ _id: id, userId: req.user._id })
+      .populate("vehicleId")
+      .populate("storeId");
+    if (!autoPart) {
+      return res
+        .status(404)
+        .json(ApiResponse({}, "Auto part not found", false));
+    }
+
+    const seller =
+      autoPart.storeId &&
+      autoPart.storeId.sellers.find(
+        (seller) => seller._id.toString() === autoPart.sellerId.toString()
+      );
+
+    const autoPartWithSeller = {
+      ...autoPart.toObject(),
+      seller: seller || null,
+    };
+
+    return res
+      .status(200)
+      .json(ApiResponse(autoPartWithSeller, "Auto part found", true));
+  } catch (error) {
+    return res.status(500).json(ApiResponse({}, error.message, false));
+  }
+};
+
+exports.getAutoPartsByUser = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const userId = req.user._id;
+  let { vehicleId, storeId, startDate, endDate } = req.query;
+
+  try {
+    let finalAggregate = [];
+
+    finalAggregate.push({ $match: { userId } });
+
+    if (vehicleId) {
+      finalAggregate.push({
+        $match: {
+          vehicleId: new mongoose.Types.ObjectId(vehicleId),
+        },
+      });
+    }
+
+    if (storeId) {
+      finalAggregate.push({
+        $match: {
+          storeId: new mongoose.Types.ObjectId(storeId),
+        },
+      });
+    }
+
+    if (startDate) {
+      startDate = convertToUTCDate(startDate);
+      finalAggregate.push({ $match: { buyingDate: { $gte: startDate } } });
+    }
+
+    if (endDate) {
+      endDate = convertToUTCDate(endDate);
+      finalAggregate.push({ $match: { buyingDate: { $lte: endDate } } });
+    }
+
+    finalAggregate.push({
+      $lookup: {
+        from: "vehicles",
+        localField: "vehicleId",
+        foreignField: "_id",
+        as: "vehicle",
+      },
+    });
+
+    finalAggregate.push({
+      $lookup: {
+        from: "stores",
+        localField: "storeId",
+        foreignField: "_id",
+        as: "store",
+      },
+    });
+
+    finalAggregate.push({ $unwind: "$vehicle" });
+    finalAggregate.push({ $unwind: "$store" });
+
+    const myAggregate =
+      finalAggregate.length > 0
+        ? AutoPart.aggregate(finalAggregate)
+        : AutoPart.aggregate([]);
+
+    AutoPart.aggregatePaginate(myAggregate, { page, limit }).then(
+      (autoParts) => {
+        res
+          .status(200)
+          .json(
+            ApiResponse(
+              autoParts,
+              `${autoParts.docs.length} auto parts found`,
+              true
+            )
+          );
+      }
+    );
+  } catch (error) {
     return res.status(500).json(ApiResponse({}, error.message, false));
   }
 };

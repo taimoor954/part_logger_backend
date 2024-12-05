@@ -2,7 +2,12 @@ const express = require("express");
 const { uploadMultiple } = require("../../middleware/upload");
 const { userRoute } = require("../../middleware");
 const { checkSubscription } = require("../../middleware/subscription");
-const { addRepair, updateRepair } = require("../../controllers/repair");
+const {
+  addRepair,
+  updateRepair,
+  getRepair,
+  getRepairsByUser,
+} = require("../../controllers/repair");
 
 const router = express.Router();
 
@@ -14,12 +19,20 @@ router.post(
   addRepair
 );
 
-// router.put(
-//   "/updateRepair/:id",
-//   userRoute,
-//   checkSubscription,
-//   uploadMultiple,
-//   updateRepair
-// );
+router.put(
+  "/updateRepair/:id",
+  userRoute,
+  checkSubscription,
+  uploadMultiple,
+  updateRepair
+);
+
+router.get("/getRepair/:id", userRoute, checkSubscription, getRepair);
+router.get(
+  "/getRepairsByUserId",
+  userRoute,
+  checkSubscription,
+  getRepairsByUser
+);
 
 module.exports = router;

@@ -1,5 +1,10 @@
 const express = require("express");
-const { addAutoPart, updateAutoPart } = require("../../controllers/autoPart");
+const {
+  addAutoPart,
+  updateAutoPart,
+  getAutoPart,
+  getAutoPartsByUser,
+} = require("../../controllers/autoPart");
 const { userRoute } = require("../../middleware");
 const { checkSubscription } = require("../../middleware/subscription");
 const { uploadMultiple } = require("../../middleware/upload");
@@ -20,6 +25,14 @@ router.put(
   checkSubscription,
   uploadMultiple,
   updateAutoPart
+);
+
+router.get("/getAutoPart/:id", userRoute, checkSubscription, getAutoPart);
+router.get(
+  "/getAutoPartsByUserId",
+  userRoute,
+  checkSubscription,
+  getAutoPartsByUser
 );
 
 module.exports = router;

@@ -70,3 +70,31 @@ exports.savePayment = async (req, res) => {
       );
   }
 };
+
+exports.getUserSubscriptions = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const userSubscriptions = await UserSubscription.find({
+      userId,
+      status: "ACTIVE",
+    }).populate("subscriptionId");
+
+    return res
+      .status(200)
+      .json(
+        ApiResponse(
+          userSubscriptions,
+          "User subscriptions retrieved successfully",
+          true
+        )
+      );
+  } catch (error) {
+    console.error("Error fetching user subscriptions:", error);
+    return res
+      .status(500)
+      .json(
+        ApiResponse({}, error.message || "An unexpected error occurred", false)
+      );
+  }
+};

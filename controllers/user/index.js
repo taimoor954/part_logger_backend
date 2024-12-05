@@ -3,6 +3,8 @@ const { generateToken, ApiResponse } = require("../../helpers");
 const bcrypt = require("bcrypt");
 const moment = require("moment");
 const fs = require("fs");
+const Vehicle = require("../../models/Vehicle");
+const Store = require("../../models/Store");
 
 // Signup Controller
 exports.register = async (req, res) => {
@@ -114,6 +116,25 @@ exports.updateProfile = async (req, res) => {
     res
       .status(200)
       .json(ApiResponse(user, "Profile Updated Successfully", true));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(ApiResponse({}, error.message, false));
+  }
+};
+
+exports.getVehiclesAndStores = async (req, res) => {
+  try {
+    const vehicles = await Vehicle.find({ userId: req.user._id });
+    const stores = await Store.find({ userId: req.user._id });
+    res
+      .status(200)
+      .json(
+        ApiResponse(
+          { vehicles, stores },
+          "Vehicles and Stores Fetched Successfully",
+          true
+        )
+      );
   } catch (error) {
     console.error(error);
     res.status(500).json(ApiResponse({}, error.message, false));
