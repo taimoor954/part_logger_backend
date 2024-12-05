@@ -1,4 +1,8 @@
-const { ApiResponse } = require("../../helpers");
+const {
+  ApiResponse,
+  convertToUTCDate,
+  handleFileOperations,
+} = require("../../helpers");
 const Vehicle = require("../../models/Vehicle");
 const Subscription = require("../../models/Subscription");
 const moment = require("moment");
@@ -53,9 +57,7 @@ exports.addVehicle = async (req, res) => {
         );
     }
 
-    const entryDateUTC = entryDate
-      ? moment(entryDate).utc().toDate()
-      : undefined;
+    const entryDateUTC = entryDate ? convertToUTCDate(entryDate) : undefined;
     const gallery = req.files.gallery
       ? req.files.gallery.map((image) => image.filename)
       : [];
@@ -101,6 +103,7 @@ exports.addVehicle = async (req, res) => {
 
 exports.updateVehicle = async (req, res) => {
   try {
+    // Find the vehicle by ID and user
     const vehicle = await Vehicle.findOne({
       _id: req.params.id,
       userId: req.user._id,
@@ -109,86 +112,81 @@ exports.updateVehicle = async (req, res) => {
       return res.status(404).json(ApiResponse({}, "Vehicle not found", false));
     }
 
-    vehicle.vehicleType = req.body.vehicleType
-      ? req.body.vehicleType
-      : vehicle.vehicleType;
-    vehicle.vehicleDetails.make = req.body.make
-      ? req.body.make
-      : vehicle.vehicleDetails.make;
-    vehicle.vehicleDetails.model = req.body.model
-      ? req.body.model
-      : vehicle.vehicleDetails.model;
-    vehicle.vehicleDetails.year = req.body.year
-      ? req.body.year
-      : vehicle.vehicleDetails.year;
-    vehicle.vehicleDetails.VIN = req.body.VIN
-      ? req.body.VIN
-      : vehicle.vehicleDetails.VIN;
-    vehicle.vehicleDetails.entryDate = req.body.entryDate
-      ? moment(req.body.entryDate).utc().toDate()
-      : vehicle.vehicleDetails.entryDate;
-    vehicle.vehicleDetails.description = req.body.description
-      ? req.body.description
-      : vehicle.vehicleDetails.description;
-    vehicle.additionalDetails.engineSize = req.body.engineSize
-      ? req.body.engineSize
-      : vehicle.additionalDetails.engineSize;
-    vehicle.additionalDetails.type = req.body.type
-      ? req.body.type
-      : vehicle.additionalDetails.type;
-    vehicle.additionalDetails.cylinders = req.body.cylinders
-      ? req.body.cylinders
-      : vehicle.additionalDetails.cylinders;
-    vehicle.additionalDetails.hasTurboCharger = req.body.hasTurboCharger
-      ? req.body.hasTurboCharger
-      : vehicle.additionalDetails.hasTurboCharger;
-    vehicle.additionalDetails.transmissionNum = req.body.transmissionNum
-      ? req.body.transmissionNum
-      : vehicle.additionalDetails.transmissionNum;
-    vehicle.additionalDetails.transmissionType = req.body.transmissionType
-      ? req.body.transmissionType
-      : vehicle.additionalDetails.transmissionType;
-    vehicle.additionalDetails.carMilage = req.body.carMilage
-      ? req.body.carMilage
-      : vehicle.additionalDetails.carMilage;
-    vehicle.additionalDetails.notes = req.body.notes
-      ? req.body.notes
-      : vehicle.additionalDetails.notes;
-    vehicle.additionalDetails.fuel = req.body.fuel
-      ? req.body.fuel
-      : vehicle.additionalDetails.fuel;
-    vehicle.additionalDetails.driveTrain = req.body.driveTrain
-      ? req.body.driveTrain
-      : vehicle.additionalDetails.driveTrain;
+    // Update vehicle fields if provided
+    const updateField = (currentValue, newValue) =>
+      newValue !== undefined ? newValue : currentValue;
 
-    if (req.files.gallery) {
-      const gallery = req.files.gallery.map((image) => image.filename);
-      vehicle.gallery = vehicle.gallery.concat(gallery);
-    }
+    vehicle.vehicleType = updateField(
+      vehicle.vehicleType,
+      req.body.vehicleType
+    );
+    vehicle.vehicleDetails = {
+      ...vehicle.vehicleDetails,
+      make: updateField(vehicle.vehicleDetails.make, req.body.make),
+      model: updateField(vehicle.vehicleDetails.model, req.body.model),
+      year: updateField(vehicle.vehicleDetails.year, req.body.year),
+      VIN: updateField(vehicle.vehicleDetails.VIN, req.body.VIN),
+      entryDate: req.body.entryDate
+        ? convertToUTCDate(req.body.entryDate)
+        : vehicle.vehicleDetails.entryDate,
+      description: updateField(
+        vehicle.vehicleDetails.description,
+        req.body.description
+      ),
+    };
 
-    // there will be an array of deleted images
-    if (req.body.deletedImages) {
-      const deletedImages = JSON.parse(req.body.deletedImages);
-      vehicle.gallery = vehicle.gallery.filter(
-        (image) => !deletedImages.includes(image)
-      );
+    vehicle.additionalDetails = {
+      ...vehicle.additionalDetails,
+      engineSize: updateField(
+        vehicle.additionalDetails.engineSize,
+        req.body.engineSize
+      ),
+      type: updateField(vehicle.additionalDetails.type, req.body.type),
+      cylinders: updateField(
+        vehicle.additionalDetails.cylinders,
+        req.body.cylinders
+      ),
+      hasTurboCharger: updateField(
+        vehicle.additionalDetails.hasTurboCharger,
+        req.body.hasTurboCharger
+      ),
+      transmissionNum: updateField(
+        vehicle.additionalDetails.transmissionNum,
+        req.body.transmissionNum
+      ),
+      transmissionType: updateField(
+        vehicle.additionalDetails.transmissionType,
+        req.body.transmissionType
+      ),
+      carMilage: updateField(
+        vehicle.additionalDetails.carMilage,
+        req.body.carMilage
+      ),
+      notes: updateField(vehicle.additionalDetails.notes, req.body.notes),
+      fuel: updateField(vehicle.additionalDetails.fuel, req.body.fuel),
+      driveTrain: updateField(
+        vehicle.additionalDetails.driveTrain,
+        req.body.driveTrain
+      ),
+    };
 
-      // delete the images from the server
-      deletedImages.forEach((image) => {
-        const filePath = `./Uploads/${image}`;
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-          console.log(`Image with file path ${filePath} deleted`);
-        }
-      });
-    }
+    // Handle gallery updates (add or delete images)
+    vehicle.gallery = handleFileOperations(
+      vehicle.gallery,
+      req.files?.gallery,
+      req.body.deletedImages
+    );
 
+    // Save changes
     await vehicle.save();
     return res
       .status(200)
       .json(ApiResponse(vehicle, "Vehicle updated successfully", true));
   } catch (error) {
-    return res.status(500).json(ApiResponse({}, error.message, false));
+    console.error("Error updating vehicle:", error.message);
+    return res
+      .status(500)
+      .json(ApiResponse({}, "Internal server error", false));
   }
 };
 

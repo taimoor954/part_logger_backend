@@ -2,6 +2,7 @@ var jwt = require("jsonwebtoken");
 // const Session = require("../Models/otherModels/Session");s
 require("dotenv").config();
 const fs = require("fs");
+const moment = require("moment");
 // Api Response Fixed Pattern
 exports.ApiResponse = (data = {}, message = "", status = false) => {
   return {
@@ -43,3 +44,38 @@ exports.generateString = (length, onlyCaps = false, onlyNumbers = false) => {
   }
   return retVal;
 };
+
+// Update Field
+exports.updateField = (target, source, fieldName) => {
+  if (source[fieldName]) target[fieldName] = source[fieldName];
+};
+
+exports.handleFileOperations = (attachments, galleryFiles, deletedImages) => {
+  if (galleryFiles?.length) {
+    const gallery = galleryFiles.map((image) => image.filename);
+    attachments.push(...gallery);
+  }
+
+  if (deletedImages) {
+    try {
+      const imagesToDelete = JSON.parse(deletedImages);
+      attachments = attachments.filter(
+        (image) => !imagesToDelete.includes(image)
+      );
+
+      imagesToDelete.forEach((image) => {
+        const filePath = `./Uploads/${image}`;
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+          console.log(`Deleted image: ${filePath}`);
+        }
+      });
+    } catch (err) {
+      throw new Error("Invalid deletedImages format");
+    }
+  }
+
+  return attachments;
+};
+
+exports.convertToUTCDate = (date) => moment(date).utc().toDate();

@@ -1,4 +1,9 @@
-const { ApiResponse } = require("../../helpers");
+const {
+  ApiResponse,
+  updateField,
+  handleFileOperations,
+  convertToUTCDate,
+} = require("../../helpers");
 const AutoPart = require("../../models/AutoPart");
 const Store = require("../../models/Store");
 const Vehicle = require("../../models/Vehicle");
@@ -22,38 +27,39 @@ exports.addAutoPart = async (req, res) => {
     extendedWarrantyPrice,
     receiptNum,
   } = req.body;
+
   try {
+    // Validate vehicle existence
     const vehicle = await Vehicle.findOne({
       _id: vehicleId,
       userId: req.user._id,
     });
-
     if (!vehicle) {
       return res.status(404).json(ApiResponse({}, "Vehicle not found", false));
     }
 
+    // Validate store existence
     const store = await Store.findOne({ _id: storeId, userId: req.user._id });
-
     if (!store) {
       return res.status(404).json(ApiResponse({}, "Store not found", false));
     }
 
-    const seller = await Store.findOne({
-      sellers: {
-        $elemMatch: {
-          _id: sellerId,
-        },
-      },
-    });
+    // Validate seller existence if provided
+    const seller = store.sellers.find(
+      (seller) => seller._id.toString() === sellerId
+    );
 
     if (!seller) {
       return res.status(404).json(ApiResponse({}, "Seller not found", false));
     }
 
-    const buyingDateUTC = buyingDate
-      ? moment(buyingDate).utc().toDate()
-      : undefined;
+    // Convert buying date to UTC
+    const buyingDateUTC = buyingDate ? convertToUTCDate(buyingDate) : undefined;
 
+    // Handle attachments (gallery files)
+    const attachments = handleFileOperations([], req.files?.gallery, null);
+
+    // Create a new auto part
     const autoPart = new AutoPart({
       userId: req.user._id,
       vehicleId,
@@ -71,9 +77,7 @@ exports.addAutoPart = async (req, res) => {
         extendedWarranty,
         extendedWarrantyPrice,
         receiptNum,
-        attachments: req.files.gallery
-          ? req.files.gallery.map((image) => image.filename)
-          : [],
+        attachments,
       },
     });
 
@@ -83,7 +87,7 @@ exports.addAutoPart = async (req, res) => {
       .status(200)
       .json(ApiResponse(autoPart, "Auto part added successfully", true));
   } catch (error) {
-    console.log(error);
+    console.error("Error adding auto part:", error.message);
     return res
       .status(500)
       .json(ApiResponse({}, "Internal server error", false));
@@ -92,123 +96,96 @@ exports.addAutoPart = async (req, res) => {
 
 exports.updateAutoPart = async (req, res) => {
   try {
-    const autoPart = await AutoPart.findOne({
-      _id: req.params.id,
-      userId: req.user._id,
-    });
+    const { id } = req.params;
+    const userId = req.user._id;
+    const { vehicleId, storeId, sellerId, deletedImages, buyingDate } =
+      req.body;
+
+    // Find the AutoPart by ID and user ID
+    const autoPart = await AutoPart.findOne({ _id: id, userId });
     if (!autoPart) {
       return res
         .status(404)
         .json(ApiResponse({}, "Auto part not found", false));
     }
 
-    if (req.body.vehicleId) {
-      const vehicle = await Vehicle.findOne({
-        _id: req.body.vehicleId,
-        userId: req.user._id,
-      });
+    // Update vehicleId if provided and valid
+    if (vehicleId) {
+      const vehicle = await Vehicle.findOne({ _id: vehicleId, userId });
       if (!vehicle) {
         return res
           .status(404)
           .json(ApiResponse({}, "Vehicle not found", false));
       }
-
-      autoPart.vehicleId = req.body.vehicleId
-        ? req.body.vehicleId
-        : autoPart.vehicleId;
+      autoPart.vehicleId = vehicleId;
     }
 
-    if (req.body.storeId) {
-      const store = await Store.findOne({
-        _id: req.body.storeId,
-        userId: req.user._id,
-      });
+    // Update storeId if provided and valid
+    if (storeId) {
+      const store = await Store.findOne({ _id: storeId, userId });
       if (!store) {
         return res.status(404).json(ApiResponse({}, "Store not found", false));
       }
-      autoPart.storeId = req.body.storeId ? req.body.storeId : autoPart.storeId;
+      autoPart.storeId = storeId;
     }
 
-    if (req.body.sellerId) {
+    // Validate sellerId only if storeId is provided
+    if (sellerId) {
+      if (!storeId) {
+        return res
+          .status(400)
+          .json(
+            ApiResponse({}, "storeId is required for seller validation", false)
+          );
+      }
       const seller = await Store.findOne({
-        sellers: {
-          $elemMatch: {
-            _id: req.body.sellerId,
-          },
-        },
+        _id: storeId,
+        userId,
+        sellers: { $elemMatch: { _id: sellerId } },
       });
       if (!seller) {
         return res.status(404).json(ApiResponse({}, "Seller not found", false));
       }
-      autoPart.sellerId = req.body.sellerId
-        ? req.body.sellerId
-        : autoPart.sellerId;
+      autoPart.sellerId = sellerId;
     }
 
-    autoPart.buyingDate = req.body.buyingDate
-      ? moment(req.body.buyingDate).utc().toDate()
-      : autoPart.buyingDate;
-
-    autoPart.partDetails.partName = req.body.partName
-      ? req.body.partName
-      : autoPart.partDetails.partName;
-    autoPart.partDetails.brand = req.body.brand
-      ? req.body.brand
-      : autoPart.partDetails.brand;
-    autoPart.partDetails.price = req.body.price
-      ? req.body.price
-      : autoPart.partDetails.price;
-    autoPart.partDetails.currentCarMileage = req.body.currentCarMileage
-      ? req.body.currentCarMileage
-      : autoPart.partDetails.currentCarMileage;
-    autoPart.partDetails.condition = req.body.condition
-      ? req.body.condition
-      : autoPart.partDetails.condition;
-    autoPart.partDetails.partNumber = req.body.partNumber
-      ? req.body.partNumber
-      : autoPart.partDetails.partNumber;
-    autoPart.partDetails.warrantyManufacture = req.body.warrantyManufacture
-      ? req.body.warrantyManufacture
-      : autoPart.partDetails.warrantyManufacture;
-    autoPart.partDetails.extendedWarranty = req.body.extendedWarranty
-      ? req.body.extendedWarranty
-      : autoPart.partDetails.extendedWarranty;
-    autoPart.partDetails.extendedWarrantyPrice = req.body.extendedWarrantyPrice
-      ? req.body.extendedWarrantyPrice
-      : autoPart.partDetails.extendedWarrantyPrice;
-    autoPart.partDetails.receiptNum = req.body.receiptNum
-      ? req.body.receiptNum
-      : autoPart.partDetails.receiptNum;
-
-    if (req.files.gallery) {
-      const gallery = req.files.gallery.map((image) => image.filename);
-      autoPart.partDetails.attachments =
-        autoPart.partDetails.attachments.concat(gallery);
+    // Update buyingDate
+    if (buyingDate) {
+      autoPart.buyingDate = moment(buyingDate).utc().toDate();
     }
 
-    if (req.body.deletedImages) {
-      const deletedImages = JSON.parse(req.body.deletedImages);
-      autoPart.partDetails.attachments =
-        autoPart.partDetails.attachments.filter(
-          (image) => !deletedImages.includes(image)
-        );
+    // Update part details
+    const partDetailsFields = [
+      "partName",
+      "brand",
+      "price",
+      "currentCarMileage",
+      "condition",
+      "partNumber",
+      "warrantyManufacture",
+      "extendedWarranty",
+      "extendedWarrantyPrice",
+      "receiptNum",
+    ];
+    partDetailsFields.forEach((field) =>
+      updateField(autoPart.partDetails, req.body, field)
+    );
 
-      // delete the images from the server
-      deletedImages.forEach((image) => {
-        const filePath = `./Uploads/${image}`;
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-          console.log(`Image with file path ${filePath} deleted`);
-        }
-      });
-    }
+    // Handle file operations
+    autoPart.partDetails.attachments = handleFileOperations(
+      autoPart.partDetails.attachments,
+      req.files?.gallery,
+      deletedImages
+    );
 
+    // Save the updated AutoPart
     await autoPart.save();
 
     return res
       .status(200)
       .json(ApiResponse(autoPart, "Auto part updated successfully", true));
   } catch (error) {
+    console.error("Error updating auto part:", error.message);
     return res.status(500).json(ApiResponse({}, error.message, false));
   }
 };

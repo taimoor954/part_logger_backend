@@ -3,10 +3,17 @@ const mongoosePaginate = require("mongoose-paginate");
 const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const Schema = mongoose.Schema;
 
+const indivdualRepairSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+});
+
 const repairPartDetailsSchema = new Schema(
   {
     repairs: {
-      type: [String],
+      type: [indivdualRepairSchema],
       required: true,
     },
     autoParts: {

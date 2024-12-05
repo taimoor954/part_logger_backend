@@ -16,7 +16,7 @@ exports.savePayment = async (req, res) => {
         .json(ApiResponse({}, "Subscription not found", false));
     }
 
-    const userSubscription = await UserSubscription.findOne({
+    let userSubscription = await UserSubscription.findOne({
       subscriptionId,
       userId,
     });
