@@ -25,6 +25,10 @@ const maintenanceSchema = new Schema(
       ref: "Worker",
       required: true,
     },
+    autoPartIds: {
+      type: [Schema.Types.ObjectId],
+      ref: "AutoPart",
+    },
     maintenanceDate: {
       type: Date,
       required: true,

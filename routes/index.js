@@ -12,5 +12,6 @@ router.use("/vehicle", require("./vehicle"));
 router.use("/autopart", require("./autoPart"));
 router.use("/repair", require("./repair"));
 router.use("/worker", require("./worker"));
+router.use("/maintenance", require("./maintenance"));
 
 module.exports = router;
