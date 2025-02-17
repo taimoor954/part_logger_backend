@@ -18,16 +18,6 @@ const addressSchema = new Schema({
   },
 });
 
-const workerSchema = new Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-    },
-  },
-  { timestamps: true }
-);
-
 const storeSchema = new Schema(
   {
     userId: {
@@ -45,14 +35,12 @@ const storeSchema = new Schema(
       required: true,
     },
     sellers: {
-      type: [workerSchema],
-      required: false,
-      default: [],
+      type: [Schema.Types.ObjectId],
+      ref: "Worker",
     },
     mechanics: {
-      type: [workerSchema],
-      required: false,
-      default: [],
+      type: [Schema.Types.ObjectId],
+      ref: "Worker",
     },
   },
   { timestamps: true }
