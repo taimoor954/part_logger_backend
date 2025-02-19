@@ -23,7 +23,7 @@ const accidentSchema = new Schema(
       type: String,
       required: true,
     },
-    involvedDriver: {
+    involvedDriverName: {
       type: String,
       required: true,
     },
@@ -34,11 +34,13 @@ const accidentSchema = new Schema(
     description: {
       type: String,
     },
+    attachments: {
+      type: [String],
+    },
   },
   { timestamps: true }
 );
 
 accidentSchema.plugin(mongoosePaginate);
 accidentSchema.plugin(aggregatePaginate);
-
 module.exports = mongoose.model("Accident", accidentSchema);
