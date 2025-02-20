@@ -15,4 +15,5 @@ router.use("/worker", require("./worker"));
 router.use("/maintenance", require("./maintenance"));
 router.use("/accident", require("./accident"));
 router.use("/travel", require("./travel"));
+router.use("/gas", require("./gas"));
 module.exports = router;

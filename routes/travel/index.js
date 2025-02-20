@@ -1,7 +1,12 @@
 const { userRoute } = require("../../middleware");
 const { checkSubscription } = require("../../middleware/subscription");
 const { uploadMultiple } = require("../../middleware/upload");
-const { addTravelExpense } = require("../../controllers/travel");
+const {
+  addTravelExpense,
+  updateExpense,
+  getExpense,
+  getExpenses,
+} = require("../../controllers/travel");
 
 const express = require("express");
 
@@ -14,5 +19,16 @@ router.post(
   uploadMultiple,
   addTravelExpense
 );
+
+router.put(
+  "/updateExpense/:id",
+  userRoute,
+  checkSubscription,
+  uploadMultiple,
+  updateExpense
+);
+
+router.get("/getExpenses", userRoute, checkSubscription, getExpenses);
+router.get("/getExpense/:id", userRoute, checkSubscription, getExpense);
 
 module.exports = router;
