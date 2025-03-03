@@ -32,7 +32,6 @@ const petSchema = new Schema(
     },
     price: {
       type: Number,
-      required: true,
     },
     attachments: {
       type: [String],
