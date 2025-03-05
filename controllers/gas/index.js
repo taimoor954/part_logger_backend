@@ -4,6 +4,7 @@ const {
   ApiResponse,
   handleFileOperations,
   convertToUTCDate,
+  deleteAttachments,
 } = require("../../helpers");
 const { default: mongoose } = require("mongoose");
 
@@ -150,6 +151,8 @@ exports.deleteGasExpense = async (req, res) => {
         .status(404)
         .json(ApiResponse({}, "Gas expense not found", false));
     }
+
+    deleteAttachments(gas.attachments);
 
     return res
       .status(200)

@@ -2,6 +2,7 @@ const {
   ApiResponse,
   handleFileOperations,
   convertToUTCDate,
+  deleteAttachments,
 } = require("../../helpers");
 const Pet = require("../../models/Pet");
 const Vet = require("../../models/Vet");
@@ -215,6 +216,8 @@ exports.deleteVet = async (req, res) => {
     if (!vet) {
       return res.status(404).json(ApiResponse({}, "Vet not found", false));
     }
+
+    deleteAttachments(vet.attachments);
 
     return res.status(200).json(ApiResponse({}, "Vet deleted successfully"));
   } catch (error) {

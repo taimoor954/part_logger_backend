@@ -3,6 +3,7 @@ const {
   updateField,
   handleFileOperations,
   convertToUTCDate,
+  deleteAttachments,
 } = require("../../helpers");
 const AutoPart = require("../../models/AutoPart");
 const Store = require("../../models/Store");
@@ -298,6 +299,29 @@ exports.getAutoPartsByUser = async (req, res) => {
           );
       }
     );
+  } catch (error) {
+    return res.status(500).json(ApiResponse({}, error.message, false));
+  }
+};
+
+exports.deleteAutoPart = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const autoPart = await AutoPart.findOneAndDelete({
+      _id: id,
+      userId: req.user._id,
+    });
+    
+    if (!autoPart) {
+      return res
+        .status(404)
+        .json(ApiResponse({}, "Auto part not found", false));
+    }
+
+    deleteAttachments(autoPart.partDetails.attachments);
+    return res
+      .status(200)
+      .json(ApiResponse({}, "Auto part deleted successfully", true));
   } catch (error) {
     return res.status(500).json(ApiResponse({}, error.message, false));
   }

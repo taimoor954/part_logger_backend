@@ -2,6 +2,7 @@ const {
   ApiResponse,
   convertToUTCDate,
   handleFileOperations,
+  deleteAttachments,
 } = require("../../helpers");
 const moment = require("moment");
 const fs = require("fs");
@@ -359,6 +360,28 @@ exports.getRepairsByUser = async (req, res) => {
         console.log(err);
         res.status(500).json(ApiResponse({}, err.message, false));
       });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json(ApiResponse({}, "Internal server error", false));
+  }
+};
+
+exports.deleteRepair = async (req, res) => {
+  try {
+    const repair = await Repair.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user._id,
+    });
+
+    if (!repair) {
+      return res.status(404).json(ApiResponse({}, "Repair not found", false));
+    }
+
+    deleteAttachments(repair.repairPartDetails.attachments);
+
+    return res.status(200).json(ApiResponse({}, "Repair deleted", true));
   } catch (error) {
     console.error(error);
     return res

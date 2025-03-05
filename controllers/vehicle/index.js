@@ -2,6 +2,7 @@ const {
   ApiResponse,
   convertToUTCDate,
   handleFileOperations,
+  deleteAttachments,
 } = require("../../helpers");
 const Vehicle = require("../../models/Vehicle");
 const Subscription = require("../../models/Subscription");
@@ -210,6 +211,24 @@ exports.getVehicleByUser = async (req, res) => {
   try {
     const vehicles = await Vehicle.find({ userId: req.user._id });
     return res.status(200).json(ApiResponse(vehicles, "Vehicles found", true));
+  } catch (error) {
+    return res.status(500).json(ApiResponse({}, error.message, false));
+  }
+};
+
+exports.deleteVehicle = async (req, res) => {
+  try {
+    const vehicle = await Vehicle.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user._id,
+    });
+    if (!vehicle) {
+      return res.status(404).json(ApiResponse({}, "Vehicle not found", false));
+    }
+
+    deleteAttachments(vehicle.gallery);
+
+    return res.status(200).json(ApiResponse({}, "Vehicle deleted", true));
   } catch (error) {
     return res.status(500).json(ApiResponse({}, error.message, false));
   }

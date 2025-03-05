@@ -7,6 +7,7 @@ const {
   updateRepair,
   getRepair,
   getRepairsByUser,
+  deleteRepair,
 } = require("../../controllers/repair");
 
 const router = express.Router();
@@ -34,5 +35,6 @@ router.get(
   checkSubscription,
   getRepairsByUser
 );
+router.delete("/deleteRepair/:id", userRoute, checkSubscription, deleteRepair);
 
 module.exports = router;

@@ -78,4 +78,16 @@ exports.handleFileOperations = (attachments, galleryFiles, deletedImages) => {
   return attachments;
 };
 
+exports.deleteAttachments = (attachments) => {
+  if (attachments) {
+    attachments.forEach((attachment) => {
+      const filePath = `./Uploads/${attachment}`;
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+        console.log(`Deleted attachment: ${filePath}`);
+      }
+    });
+  }
+};
+
 exports.convertToUTCDate = (date) => moment(date).utc().toDate();

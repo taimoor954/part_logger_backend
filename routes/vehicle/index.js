@@ -1,5 +1,5 @@
 const express = require("express");
-const { updateVehicle } = require("../../controllers/vehicle");
+const { updateVehicle, deleteVehicle } = require("../../controllers/vehicle");
 const { getVehicle } = require("../../controllers/vehicle");
 const { addVehicle, getVehicleByUser } = require("../../controllers/vehicle");
 const { userRoute } = require("../../middleware");
@@ -26,5 +26,11 @@ router.put(
 
 router.get("/getVehicleById/:id", userRoute, checkSubscription, getVehicle);
 router.get("/getVehicleByUser", userRoute, checkSubscription, getVehicleByUser);
+router.delete(
+  "/deleteVehicle/:id",
+  userRoute,
+  checkSubscription,
+  deleteVehicle
+);
 
 module.exports = router;

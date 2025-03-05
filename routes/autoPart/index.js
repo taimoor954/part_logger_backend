@@ -4,6 +4,7 @@ const {
   updateAutoPart,
   getAutoPart,
   getAutoPartsByUser,
+  deleteAutoPart,
 } = require("../../controllers/autoPart");
 const { userRoute } = require("../../middleware");
 const { checkSubscription } = require("../../middleware/subscription");
@@ -33,6 +34,12 @@ router.get(
   userRoute,
   checkSubscription,
   getAutoPartsByUser
+);
+router.delete(
+  "/deleteAutoPart/:id",
+  userRoute,
+  checkSubscription,
+  deleteAutoPart
 );
 
 module.exports = router;
