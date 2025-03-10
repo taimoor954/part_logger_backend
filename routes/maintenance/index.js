@@ -7,6 +7,7 @@ const {
   updateMaintenance,
   getMaintenance,
   getMaintenances,
+  deleteMaintenance,
 } = require("../../controllers/maintenance");
 
 const router = express.Router();
@@ -33,6 +34,13 @@ router.get(
   userRoute,
   checkSubscription,
   getMaintenances
+);
+
+router.delete(
+  "/deleteMaintenance/:id",
+  userRoute,
+  checkSubscription,
+  deleteMaintenance
 );
 
 module.exports = router;

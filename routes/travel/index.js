@@ -6,6 +6,7 @@ const {
   updateExpense,
   getExpense,
   getExpenses,
+  deleteExpense,
 } = require("../../controllers/travel");
 
 const express = require("express");
@@ -30,5 +31,11 @@ router.put(
 
 router.get("/getExpenses", userRoute, checkSubscription, getExpenses);
 router.get("/getExpense/:id", userRoute, checkSubscription, getExpense);
+router.delete(
+  "/deleteExpense/:id",
+  userRoute,
+  checkSubscription,
+  deleteExpense
+);
 
 module.exports = router;

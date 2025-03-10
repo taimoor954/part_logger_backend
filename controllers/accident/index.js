@@ -3,6 +3,7 @@ const {
   ApiResponse,
   handleFileOperations,
   convertToUTCDate,
+  deleteAttachments,
 } = require("../../helpers");
 const Accident = require("../../models/Accident");
 const Vehicle = require("../../models/Vehicle");
@@ -279,6 +280,29 @@ exports.getAccidentsByIds = async (req, res) => {
           );
       }
     );
+  } catch (error) {
+    return res.status(500).json(ApiResponse({}, error.message, false));
+  }
+};
+
+exports.deleteAccident = async (req, res) => {
+  const userId = req.user._id;
+  const accidentId = req.params.id;
+  try {
+    const accident = await Accident.findOneAndDelete({
+      _id: accidentId,
+      userId,
+    });
+
+    if (!accident) {
+      return res.status(404).json(ApiResponse({}, "Accident not found", false));
+    }
+
+    deleteAttachments(accident.attachments);
+
+    return res
+      .status(200)
+      .json(ApiResponse({}, "Accident deleted successfully", true));
   } catch (error) {
     return res.status(500).json(ApiResponse({}, error.message, false));
   }

@@ -1,5 +1,5 @@
 const Travel = require("../../models/Travel");
-const { handleFileOperations } = require("../../helpers");
+const { handleFileOperations, deleteAttachments } = require("../../helpers");
 const { convertToUTCDate } = require("../../helpers");
 const { ApiResponse } = require("../../helpers");
 
@@ -190,7 +190,9 @@ exports.getExpenses = async (req, res) => {
       if (!isNaN(start.getTime())) {
         matchQuery.createdAt = { $gte: start };
       } else {
-        return res.status(400).json(ApiResponse({}, "Invalid startDate", false));
+        return res
+          .status(400)
+          .json(ApiResponse({}, "Invalid startDate", false));
       }
     }
 
@@ -206,20 +208,24 @@ exports.getExpenses = async (req, res) => {
 
     const myAggregate = Travel.aggregate([
       { $match: matchQuery },
-      { $sort: { createdAt: -1 } }
+      { $sort: { createdAt: -1 } },
     ]);
 
-    const travels = await Travel.aggregatePaginate(myAggregate, { page, limit });
+    const travels = await Travel.aggregatePaginate(myAggregate, {
+      page,
+      limit,
+    });
 
     return res
       .status(200)
       .json(ApiResponse(travels, `${travels.docs.length} travels found`, true));
   } catch (error) {
     console.error(error);
-    return res.status(500).json(ApiResponse({}, "Internal server error", false));
+    return res
+      .status(500)
+      .json(ApiResponse({}, "Internal server error", false));
   }
 };
-
 
 exports.getExpense = async (req, res) => {
   const userId = req.user._id;
@@ -238,6 +244,33 @@ exports.getExpense = async (req, res) => {
     return res
       .status(200)
       .json(ApiResponse(travel, "Travel expense found", true));
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json(ApiResponse({}, "Internal server error", false));
+  }
+};
+
+exports.deleteExpense = async (req, res) => {
+  const userId = req.user._id;
+  try {
+    const travel = await Travel.findOneAndDelete({
+      _id: req.params.id,
+      userId,
+    });
+
+    if (!travel) {
+      return res
+        .status(404)
+        .json(ApiResponse({}, "Travel expense not found", false));
+    }
+
+    deleteAttachments(travel.attachments);
+
+    return res
+      .status(200)
+      .json(ApiResponse({}, "Travel expense deleted successfully", true));
   } catch (error) {
     console.error(error);
     return res

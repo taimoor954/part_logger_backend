@@ -7,6 +7,7 @@ const {
   updateAccident,
   getAccident,
   getAccidentsByIds,
+  deleteAccident,
 } = require("../../controllers/accident");
 const router = express.Router();
 
@@ -28,5 +29,6 @@ router.put(
 
 router.get("/getAccident/:id", userRoute, checkSubscription, getAccident);
 router.get("/getAccidents", userRoute, checkSubscription, getAccidentsByIds);
+router.delete("/deleteAccident/:id", userRoute, checkSubscription, deleteAccident);
 
 module.exports = router;
