@@ -6,7 +6,7 @@ const DB = {
   development: DB_ATLAS,
   // development: DB_LOCAL,
   // development: DB_CUSTOMDEV,
-  customdev: DB_CUSTOMDEV,
+  customdev: DB_ATLAS,
   live: DB_LOCAL,
 };
 
