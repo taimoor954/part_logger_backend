@@ -16,40 +16,38 @@ exports.addStore = async (req, res) => {
 
   try {
     // Ensure sellers and mechanics are arrays
-    let parsedSellers =
-      typeof sellers === "string" ? JSON.parse(sellers) : sellers;
-    let parsedMechanics =
-      typeof mechanics === "string" ? JSON.parse(mechanics) : mechanics;
+    const parseArray = (data) =>
+      typeof data === "string" ? JSON.parse(data) : data;
+    const parsedSellers = parseArray(sellers);
+    const parsedMechanics = parseArray(mechanics);
 
-    if (!Array.isArray(parsedSellers) || !Array.isArray(parsedMechanics)) {
-      return res
-        .status(400)
-        .json(ApiResponse({}, "Sellers and mechanics must be arrays", false));
+    // Create sellers and get their IDs
+    let sellerIds = [];
+    if (parsedSellers.length > 0) {
+      const createdSellers = await Worker.insertMany(
+        parsedSellers.map((seller) => ({
+          userId,
+          name: seller,
+          type: "SELLER",
+        }))
+      );
+      sellerIds = createdSellers.map((seller) => seller._id);
     }
 
-    // Validate ObjectIds
-    parsedSellers = parsedSellers.filter((id) => mongoose.isValidObjectId(id));
-    parsedMechanics = parsedMechanics.filter((id) =>
-      mongoose.isValidObjectId(id)
-    );
-
-    // Fetch workers from DB
-    const validSellers = await Worker.find({ _id: { $in: parsedSellers } });
-    const validMechanics = await Worker.find({ _id: { $in: parsedMechanics } });
-
-    if (validSellers.length !== parsedSellers.length) {
-      return res
-        .status(404)
-        .json(ApiResponse({}, "One or more sellers not found", false));
+    // Create mechanics and get their IDs
+    let mechanicIds = [];
+    if (parsedMechanics.length > 0) {
+      const createdMechanics = await Worker.insertMany(
+        parsedMechanics.map((mechanic) => ({
+          userId,
+          name: mechanic,
+          type: "MECHANIC",
+        }))
+      );
+      mechanicIds = createdMechanics.map((mechanic) => mechanic._id);
     }
 
-    if (validMechanics.length !== parsedMechanics.length) {
-      return res
-        .status(404)
-        .json(ApiResponse({}, "One or more mechanics not found", false));
-    }
-
-    // Create store with sellers and mechanics
+    // Create store with seller and mechanic IDs
     const store = new Store({
       userId,
       storeName,
@@ -58,8 +56,8 @@ exports.addStore = async (req, res) => {
         city,
         state,
       },
-      sellers: Array.from(new Set(parsedSellers)),
-      mechanics: Array.from(new Set(parsedMechanics)),
+      sellers: sellerIds,
+      mechanics: mechanicIds,
     });
 
     await store.save();
@@ -75,93 +73,76 @@ exports.addStore = async (req, res) => {
 exports.addWorker = async (req, res) => {
   const { storeId } = req.params;
   let { sellers = [], mechanics = [] } = req.body;
+  const userId = req.user._id;
 
   try {
-    if (!mongoose.isValidObjectId(storeId)) {
-      return res.status(400).json(ApiResponse({}, "Invalid store ID", false));
-    }
-
-    // Ensure sellers and mechanics are arrays
-    if (typeof sellers === "string") {
-      try {
-        sellers = JSON.parse(sellers);
-        if (!Array.isArray(sellers)) throw new Error();
-      } catch (error) {
-        return res
-          .status(400)
-          .json(ApiResponse({}, "Invalid sellers format", false));
-      }
-    }
-
-    if (typeof mechanics === "string") {
-      try {
-        mechanics = JSON.parse(mechanics);
-        if (!Array.isArray(mechanics)) throw new Error();
-      } catch (error) {
-        return res
-          .status(400)
-          .json(ApiResponse({}, "Invalid mechanics format", false));
-      }
-    }
-
-    if (!Array.isArray(sellers) || !Array.isArray(mechanics)) {
-      return res
-        .status(400)
-        .json(ApiResponse({}, "Sellers and mechanics must be arrays", false));
-    }
-
-    const store = await Store.findById(storeId);
+    // Find the existing store
+    const store = await Store.findOne({ _id: storeId, userId });
     if (!store) {
       return res.status(404).json(ApiResponse({}, "Store not found", false));
     }
 
-    // Validate worker IDs
-    sellers = sellers.filter((id) => mongoose.isValidObjectId(id));
-    mechanics = mechanics.filter((id) => mongoose.isValidObjectId(id));
+    // Ensure sellers and mechanics are arrays
+    const parseArray = (data) =>
+      typeof data === "string" ? JSON.parse(data) : data;
+    const parsedSellers = parseArray(sellers);
+    const parsedMechanics = parseArray(mechanics);
 
-    const newSellers = await Worker.find({
-      _id: { $in: sellers },
-      type: "SELLER",
-    });
-    const newMechanics = await Worker.find({
-      _id: { $in: mechanics },
-      type: "MECHANIC",
-    });
-
-    if (newSellers.length !== sellers.length) {
-      return res
-        .status(404)
-        .json(ApiResponse({}, "One or more sellers not found", false));
+    // Create new sellers and get their IDs
+    let newSellerIds = [];
+    if (parsedSellers.length > 0) {
+      const createdSellers = await Worker.insertMany(
+        parsedSellers.map((seller) => ({
+          userId,
+          name: seller,
+          type: "SELLER",
+        }))
+      );
+      newSellerIds = createdSellers.map((seller) => seller._id);
     }
 
-    if (newMechanics.length !== mechanics.length) {
-      return res
-        .status(404)
-        .json(ApiResponse({}, "One or more mechanics not found", false));
+    // Create new mechanics and get their IDs
+    let newMechanicIds = [];
+    if (parsedMechanics.length > 0) {
+      const createdMechanics = await Worker.insertMany(
+        parsedMechanics.map((mechanic) => ({
+          userId,
+          name: mechanic,
+          type: "MECHANIC",
+        }))
+      );
+      newMechanicIds = createdMechanics.map((mechanic) => mechanic._id);
     }
 
-    // Add workers without duplicates
-    store.sellers = Array.from(
-      new Set([...store.sellers.map(String), ...sellers])
-    );
-    store.mechanics = Array.from(
-      new Set([...store.mechanics.map(String), ...mechanics])
-    );
+    // Update store with new worker IDs
+    store.sellers = [...store.sellers, ...newSellerIds];
+    store.mechanics = [...store.mechanics, ...newMechanicIds];
+
+    // Optional: Remove duplicates if needed
+    store.sellers = [...new Set(store.sellers)];
+    store.mechanics = [...new Set(store.mechanics)];
 
     await store.save();
 
+    // Optionally populate the workers for the response
+    const updatedStore = await Store.findById(storeId)
+      .populate("sellers")
+      .populate("mechanics");
+
     return res
       .status(200)
-      .json(ApiResponse(store, "Workers added successfully", true));
+      .json(ApiResponse(updatedStore, "Workers added successfully", true));
   } catch (error) {
     return res.status(500).json(ApiResponse({}, error.message, false));
   }
 };
-
 exports.getStore = async (req, res) => {
   const { storeId } = req.params;
   try {
-    const store = await Store.findById(storeId);
+    const store = await Store.findById(storeId)
+      .populate("sellers")
+      .populate("mechanics");
+
     if (!store) {
       return res.status(404).json(ApiResponse({}, "Store not found", false));
     }
@@ -183,18 +164,16 @@ exports.updateStore = async (req, res) => {
     oldMechanics = [],
     newMechanics = [],
   } = req.body;
+  const userId = req.user._id;
 
   try {
-    if (!mongoose.isValidObjectId(storeId)) {
-      return res.status(400).json(ApiResponse({}, "Invalid store ID", false));
-    }
-
-    const store = await Store.findById(storeId);
+    // Find the existing store
+    const store = await Store.findOne({ _id: storeId, userId });
     if (!store) {
       return res.status(404).json(ApiResponse({}, "Store not found", false));
     }
 
-    // Ensure data is parsed correctly
+    // Parse arrays if they come as strings
     const parseArray = (data) =>
       typeof data === "string" ? JSON.parse(data) : data;
     oldSellers = parseArray(oldSellers);
@@ -202,74 +181,88 @@ exports.updateStore = async (req, res) => {
     oldMechanics = parseArray(oldMechanics);
     newMechanics = parseArray(newMechanics);
 
-    if (
-      !Array.isArray(oldSellers) ||
-      !Array.isArray(newSellers) ||
-      !Array.isArray(oldMechanics) ||
-      !Array.isArray(newMechanics)
-    ) {
-      return res
-        .status(400)
-        .json(ApiResponse({}, "Invalid worker data format", false));
+    // Remove old sellers
+    if (oldSellers.length > 0) {
+      store.sellers = store.sellers.filter(
+        (sellerId) => !oldSellers.includes(sellerId.toString())
+      );
+      await Worker.deleteMany({
+        _id: { $in: oldSellers },
+        userId,
+        type: "SELLER",
+      });
     }
 
-    // Validate ObjectIds
-    oldSellers = oldSellers.filter((id) => mongoose.isValidObjectId(id));
-    newSellers = newSellers.filter((id) => mongoose.isValidObjectId(id));
-    oldMechanics = oldMechanics.filter((id) => mongoose.isValidObjectId(id));
-    newMechanics = newMechanics.filter((id) => mongoose.isValidObjectId(id));
-
-    // Ensure new workers exist before adding
-    const validNewSellers = await Worker.find({ _id: { $in: newSellers } });
-    const validNewMechanics = await Worker.find({ _id: { $in: newMechanics } });
-
-    if (validNewSellers.length !== newSellers.length) {
-      return res
-        .status(404)
-        .json(ApiResponse({}, "One or more new sellers not found", false));
+    // Remove old mechanics
+    if (oldMechanics.length > 0) {
+      store.mechanics = store.mechanics.filter(
+        (mechanicId) => !oldMechanics.includes(mechanicId.toString())
+      );
+      await Worker.deleteMany({
+        _id: { $in: oldMechanics },
+        userId,
+        type: "MECHANIC",
+      });
     }
 
-    if (validNewMechanics.length !== newMechanics.length) {
-      return res
-        .status(404)
-        .json(ApiResponse({}, "One or more new mechanics not found", false));
+    // Add new sellers
+    let newSellerIds = [];
+    if (newSellers.length > 0) {
+      const createdSellers = await Worker.insertMany(
+        newSellers.map((seller) => ({
+          userId,
+          name: seller,
+          type: "SELLER",
+        }))
+      );
+      newSellerIds = createdSellers.map((seller) => seller._id);
+      store.sellers = [...store.sellers, ...newSellerIds];
     }
 
-    // Convert IDs to strings for consistent comparison
-    const currentSellers = store.sellers.map(String);
-    const currentMechanics = store.mechanics.map(String);
+    // Add new mechanics
+    let newMechanicIds = [];
+    if (newMechanics.length > 0) {
+      const createdMechanics = await Worker.insertMany(
+        newMechanics.map((mechanic) => ({
+          userId,
+          name: mechanic,
+          type: "MECHANIC",
+        }))
+      );
+      newMechanicIds = createdMechanics.map((mechanic) => mechanic._id);
+      store.mechanics = [...store.mechanics, ...newMechanicIds];
+    }
 
-    // Remove old sellers & add new ones (ensuring uniqueness)
-    store.sellers = Array.from(
-      new Set([
-        ...currentSellers.filter((id) => !oldSellers.includes(id)),
-        ...newSellers,
-      ])
-    );
+    // Update store details if provided
+    if (storeName) store.storeName = storeName;
+    if (address || city || state) {
+      store.storeAddress = {
+        address: address || store.storeAddress.address,
+        city: city || store.storeAddress.city,
+        state: state || store.storeAddress.state,
+      };
+    }
 
-    // Remove old mechanics & add new ones (ensuring uniqueness)
-    store.mechanics = Array.from(
-      new Set([
-        ...currentMechanics.filter((id) => !oldMechanics.includes(id)),
-        ...newMechanics,
-      ])
-    );
-
-    // Save updated store
     await store.save();
+
+    // Get updated store with populated workers
+    const updatedStore = await Store.findById(storeId)
+      .populate("sellers")
+      .populate("mechanics");
 
     return res
       .status(200)
-      .json(ApiResponse(store, "Store updated successfully", true));
+      .json(ApiResponse(updatedStore, "Store updated successfully", true));
   } catch (error) {
     return res.status(500).json(ApiResponse({}, error.message, false));
   }
 };
-
 exports.getStoresByUser = async (req, res) => {
   const userId = req.user._id;
   try {
-    const stores = await Store.find({ userId });
+    const stores = await Store.find({ userId })
+      .populate("sellers")
+      .populate("mechanics");
     return res.status(200).json(ApiResponse(stores, "Stores found", true));
   } catch (error) {
     return res.status(400).json(ApiResponse({}, error.message, false));

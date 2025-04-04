@@ -149,7 +149,7 @@ exports.getEquipments = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const userId = req.user._id;
-  let { startDate, endDate } = req.query;
+  let { startDate, endDate, type } = req.query;
 
   try {
     let finalAggregate = [];
@@ -169,6 +169,11 @@ exports.getEquipments = async (req, res) => {
     if (endDate) {
       endDate = convertToUTCDate(endDate);
       finalAggregate.push({ $match: { purchaseDate: { $lte: endDate } } });
+    }
+
+    if (type) {
+      type = type.toUpperCase();
+      finalAggregate.push({ $match: { equipmentType: type } });
     }
 
     finalAggregate.push({
