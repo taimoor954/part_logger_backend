@@ -140,3 +140,111 @@ exports.getVehiclesAndStores = async (req, res) => {
     res.status(500).json(ApiResponse({}, error.message, false));
   }
 };
+
+exports.getUsers = async (req, res) => {
+  const page = req.query.page || 1;
+  const limit = req.query.limit || 10;
+  const { keyword, from, to } = req.query;
+
+  let finalAggregate = [];
+  finalAggregate.push({
+    $sort: {
+      createdAt: -1,
+    },
+  });
+  finalAggregate.push({
+    $match: {
+      isAdmin: false,
+    },
+  });
+  if (from) {
+    const utcFrom = moment.utc(from, "YYYY-MM-DD").startOf("day").toDate();
+    finalAggregate.push({
+      $match: {
+        createdAt: {
+          $gte: utcFrom,
+        },
+      },
+    });
+  }
+  if (to) {
+    const utcTo = moment.utc(to, "YYYY-MM-DD").endOf("day").toDate();
+    finalAggregate.push({
+      $match: {
+        createdAt: {
+          $lte: utcTo,
+        },
+      },
+    });
+  }
+  if (keyword) {
+    const regex = new RegExp(keyword.toLowerCase(), "i");
+    finalAggregate.push({
+      $match: {
+        $or: [
+          { firstName: { $regex: regex } },
+          { lastName: { $regex: regex } },
+        ],
+      },
+    });
+  }
+
+  // remove password from the result
+  finalAggregate.push({
+    $project: {
+      password: 0, // Exclude the password field
+    },
+  });
+
+  const myAggregate =
+    finalAggregate.length > 0
+      ? User.aggregate(finalAggregate)
+      : User.aggregate([]);
+  User.aggregatePaginate(myAggregate, { page, limit })
+    .then((users) => {
+      res
+        .status(200)
+        .json(ApiResponse(users, `${users.docs.length} users found`, true));
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(ApiResponse({}, err.message, false));
+    });
+};
+
+exports.toggleStatus = async (req, res) => {
+  try {
+    let user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json(ApiResponse({}, "User Not Found", false));
+    }
+
+    const updatedStatus = user.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+
+    user = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: { status: updatedStatus } },
+      { new: true, select: "-password" } // exclude password
+    );
+
+    res
+      .status(200)
+      .json(ApiResponse(user, "User Status Updated Successfully", true));
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(ApiResponse({}, error.message, false));
+  }
+};
+exports.getUserById = async (req, res) => {
+  const user = await User.findById(req.params.id);
+  try {
+    if (!user) {
+      return res.status(404).json(ApiResponse({}, "User Not Found", false));
+    }
+    res.status(200).json(ApiResponse(user, "Success", true));
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(ApiResponse({}, error.message, false));
+  }
+};
