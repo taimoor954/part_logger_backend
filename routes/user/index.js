@@ -6,8 +6,11 @@ const {
   login,
   updateProfile,
   getVehiclesAndStores,
+  getUsers,
+  getUserById,
+  toggleStatus,
 } = require("../../controllers/user");
-const { userRoute } = require("../../middleware");
+const { userRoute, adminRoute } = require("../../middleware");
 const { checkSubscription } = require("../../middleware/subscription");
 
 const router = express.Router();
@@ -21,5 +24,10 @@ router.get(
   checkSubscription,
   getVehiclesAndStores
 );
+
+// admin routes
+router.get("/getUsers", adminRoute, getUsers);
+router.get("/getUserById/:id", adminRoute, getUserById);
+router.put("/toggleStatus/:id", adminRoute, toggleStatus);
 
 module.exports = router;
