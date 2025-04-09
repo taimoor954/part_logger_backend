@@ -10,7 +10,8 @@ const {
 
 const router = express.Router();
 
-router.post("/addSubscription", adminRoute, addSubscription);
+// router.post("/addSubscription", adminRoute, addSubscription); // Change this line to dummy payment change in future
+router.post("/addSubscription", userRoute, addSubscription);
 router.put("/updateSubscription/:id", adminRoute, updateSubscription);
 router.delete("/deleteSubscription/:id", adminRoute, deleteSubscription);
 router.get("/getSubscription/:id", adminRoute, getSubscription);
