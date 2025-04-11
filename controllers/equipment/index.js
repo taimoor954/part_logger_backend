@@ -209,10 +209,10 @@ exports.getEquipments = async (req, res) => {
 };
 
 exports.deleteEquipment = async (req, res) => {
-  const { equipmentId } = req.params;
+  const { id } = req.params;
   try {
     const equipment = await Equipment.findOneAndDelete({
-      _id: equipmentId,
+      _id: id,
       userId: req.user._id,
     });
 

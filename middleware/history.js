@@ -6,16 +6,16 @@ const {
   getAutoPartsByUser,
   deleteAutoPart,
 } = require("../controllers/autoPart");
-const { getEquipments } = require("../controllers/equipment");
+const { getEquipments, deleteEquipment } = require("../controllers/equipment");
 const { getGasExpenses, deleteGasExpense } = require("../controllers/gas");
 const {
   getMaintenances,
   deleteMaintenance,
 } = require("../controllers/maintenance");
-const { getPets } = require("../controllers/pet");
+const { getPets, deletePet } = require("../controllers/pet");
 const { getRepairsByUser, deleteRepair } = require("../controllers/repair");
 const { getExpenses, deleteTravelExpense } = require("../controllers/travel");
-const { getVets } = require("../controllers/vet");
+const { getVets, deleteVet } = require("../controllers/vet");
 const { ApiResponse } = require("../helpers");
 
 exports.checkRecordType = async (req, res, next) => {
@@ -78,7 +78,7 @@ exports.checkOtherRecordType = async (req, res, next) => {
   }
 };
 
-exports.deleteRecord = async (req, res, next) => {
+exports.checkDeleteRecord = async (req, res, next) => {
   const { type } = req.query;
 
   try {
@@ -106,6 +106,18 @@ exports.deleteRecord = async (req, res, next) => {
         break;
       case "TRAVEL":
         await deleteTravelExpense(req, res);
+        break;
+      case "PET":
+        await deletePet(req, res);
+        break;
+      case "VET":
+        await deleteVet(req, res);
+        break;
+      case "HEAVY":
+      case "HOME":
+      case "SMALL":
+      case "TOOL":
+        await deleteEquipment(req, res);
         break;
       default:
         return res

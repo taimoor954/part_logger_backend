@@ -251,10 +251,10 @@ exports.getPets = async (req, res) => {
 };
 
 exports.deletePet = async (req, res) => {
-  const { petId } = req.params;
+  const { id } = req.params;
   try {
     const pet = await Pet.findOneAndDelete({
-      _id: petId,
+      _id: id,
       userId: req.user._id,
     });
 
@@ -262,7 +262,7 @@ exports.deletePet = async (req, res) => {
       return res.status(404).json(ApiResponse({}, "Pet not found", false));
     }
 
-    deleteAttachments(pet.attachments)
+    deleteAttachments(pet.attachments);
 
     return res.status(200).json(ApiResponse({}, "Pet deleted", true));
   } catch (err) {

@@ -22,6 +22,6 @@ router.put(
 );
 router.get("/getPets", userRoute, checkSubscription, getPets);
 router.get("/getPet/:petId", userRoute, checkSubscription, getPet);
-router.delete("/deletePet/:petId", userRoute, checkSubscription, deletePet);
+router.delete("/deletePet/:id", userRoute, checkSubscription, deletePet);
 
 module.exports = router;

@@ -36,7 +36,7 @@ router.get(
   getEquipment
 );
 router.delete(
-  "/deleteEquipment/:equipmentId",
+  "/deleteEquipment/:id",
   userRoute,
   checkSubscription,
   deleteEquipment

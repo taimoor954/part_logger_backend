@@ -206,10 +206,10 @@ exports.getVets = async (req, res) => {
 };
 
 exports.deleteVet = async (req, res) => {
-  const { vetId } = req.params;
+  const { id } = req.params;
   try {
     const vet = await Vet.findOneAndDelete({
-      _id: vetId,
+      _id: id,
       userId: req.user._id,
     });
 

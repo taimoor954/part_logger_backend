@@ -4,6 +4,7 @@ const { checkSubscription } = require("../../middleware/subscription");
 const {
   checkRecordType,
   checkOtherRecordType,
+  checkDeleteRecord,
 } = require("../../middleware/history");
 
 const router = express.Router();
