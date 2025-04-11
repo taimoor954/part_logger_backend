@@ -1,5 +1,5 @@
 const express = require("express");
-const { adminRoute } = require("../../middleware");
+const { adminRoute, userRoute } = require("../../middleware");
 const {
   addSubscription,
   updateSubscription,
@@ -14,6 +14,6 @@ router.post("/addSubscription", adminRoute, addSubscription);
 router.put("/updateSubscription/:id", adminRoute, updateSubscription);
 router.delete("/deleteSubscription/:id", adminRoute, deleteSubscription);
 router.get("/getSubscription/:id", adminRoute, getSubscription);
-router.get("/getSubscriptions", adminRoute, getSubscriptions);
+router.get("/getSubscriptions", userRoute, getSubscriptions);
 
 module.exports = router;

@@ -111,7 +111,7 @@ exports.addRepair = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json(ApiResponse({}, "Internal server error", false));
+      .json(ApiResponse({error: error?.message}, "Internal server error", false));
   }
 };
 
