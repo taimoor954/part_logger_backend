@@ -1,11 +1,20 @@
-const { getAccidentsByIds } = require("../controllers/accident");
-const { getAutoPartsByUser } = require("../controllers/autoPart");
+const {
+  getAccidentsByIds,
+  deleteAccident,
+} = require("../controllers/accident");
+const {
+  getAutoPartsByUser,
+  deleteAutoPart,
+} = require("../controllers/autoPart");
 const { getEquipments } = require("../controllers/equipment");
-const { getGasExpenses } = require("../controllers/gas");
-const { getMaintenances } = require("../controllers/maintenance");
+const { getGasExpenses, deleteGasExpense } = require("../controllers/gas");
+const {
+  getMaintenances,
+  deleteMaintenance,
+} = require("../controllers/maintenance");
 const { getPets } = require("../controllers/pet");
-const { getRepairsByUser } = require("../controllers/repair");
-const { getExpenses } = require("../controllers/travel");
+const { getRepairsByUser, deleteRepair } = require("../controllers/repair");
+const { getExpenses, deleteTravelExpense } = require("../controllers/travel");
 const { getVets } = require("../controllers/vet");
 const { ApiResponse } = require("../helpers");
 
@@ -58,6 +67,45 @@ exports.checkOtherRecordType = async (req, res, next) => {
       case "SMALL":
       case "TOOL":
         await getEquipments(req, res);
+        break;
+      default:
+        return res
+          .status(400)
+          .json(ApiResponse({}, "Invalid category type", false));
+    }
+  } catch (error) {
+    return res.status(500).json(ApiResponse({}, error.message, false));
+  }
+};
+
+exports.deleteRecord = async (req, res, next) => {
+  const { type } = req.query;
+
+  try {
+    if (!type) {
+      return res
+        .status(400)
+        .json(ApiResponse({}, "Missing record type", false));
+    }
+
+    switch (type.toUpperCase()) {
+      case "AUTOPART":
+        await deleteAutoPart(req, res);
+        break;
+      case "REPAIR":
+        await deleteRepair(req, res);
+        break;
+      case "MAINTENANCE":
+        await deleteMaintenance(req, res);
+        break;
+      case "ACCIDENT":
+        await deleteAccident(req, res);
+        break;
+      case "GAS":
+        await deleteGasExpense(req, res);
+        break;
+      case "TRAVEL":
+        await deleteTravelExpense(req, res);
         break;
       default:
         return res

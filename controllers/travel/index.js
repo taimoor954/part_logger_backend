@@ -252,7 +252,7 @@ exports.getExpense = async (req, res) => {
   }
 };
 
-exports.deleteExpense = async (req, res) => {
+exports.deleteTravelExpense = async (req, res) => {
   const userId = req.user._id;
   try {
     const travel = await Travel.findOneAndDelete({

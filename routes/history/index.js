@@ -15,5 +15,11 @@ router.get(
   checkSubscription,
   checkOtherRecordType
 );
+router.delete(
+  "/deleteRecord/:id",
+  userRoute,
+  checkSubscription,
+  checkDeleteRecord
+);
 
 module.exports = router;

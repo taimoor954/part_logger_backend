@@ -6,7 +6,7 @@ const {
   updateExpense,
   getExpense,
   getExpenses,
-  deleteExpense,
+  deleteTravelExpense,
 } = require("../../controllers/travel");
 
 const express = require("express");
@@ -35,7 +35,7 @@ router.delete(
   "/deleteExpense/:id",
   userRoute,
   checkSubscription,
-  deleteExpense
+  deleteTravelExpense
 );
 
 module.exports = router;
