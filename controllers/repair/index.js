@@ -111,7 +111,9 @@ exports.addRepair = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json(ApiResponse({error: error?.message}, "Internal server error", false));
+      .json(
+        ApiResponse({ error: error?.message }, "Internal server error", false)
+      );
   }
 };
 
@@ -222,12 +224,17 @@ exports.updateRepair = async (req, res) => {
 
     repair.repairPartDetails = {
       ...repair.repairPartDetails,
-      currentCarMileage: req.body.currentCarMileage || repair.currentCarMileage,
+      currentCarMileage:
+        req.body.currentCarMileage ||
+        repair.repairPartDetails.currentCarMileage,
       estimatedRepairCost:
-        req.body.estimatedRepairCost || repair.estimatedRepairCost,
-      laborCost: req.body.laborCost || repair.laborCost,
-      repairPartsCost: req.body.repairPartsCost || repair.repairPartsCost,
-      totalRepairCost: req.body.totalRepairCost || repair.totalRepairCost,
+        req.body.estimatedRepairCost ||
+        repair.repairPartDetails.estimatedRepairCost,
+      laborCost: req.body.laborCost || repair.repairPartDetails.laborCost,
+      repairPartsCost:
+        req.body.repairPartsCost || repair.repairPartDetails.repairPartsCost,
+      totalRepairCost:
+        req.body.totalRepairCost || repair.repairPartDetails.totalRepairCost,
     };
 
     // Handle file operations

@@ -89,7 +89,7 @@ exports.addTravelExpense = async (req, res) => {
   }
 };
 
-exports.updateExpense = async (req, res) => {
+exports.updateTravelExpense = async (req, res) => {
   const userId = req.user._id;
   const {
     departureDate,

@@ -66,10 +66,10 @@ exports.addVet = async (req, res) => {
 exports.updateVet = async (req, res) => {
   const { checkupDate, payment, otherExpense, details, deleteImages, petId } =
     req.body;
-  const { vetId } = req.params;
+  const { id } = req.params;
   try {
     const vet = await Vet.findOne({
-      _id: vetId,
+      _id: id,
       userId: req.user._id,
     });
 
@@ -109,6 +109,7 @@ exports.updateVet = async (req, res) => {
             )
           );
       }
+      vet.checkupDate = checkupDateUTC;
     }
 
     vet.attachments = handleFileOperations(
@@ -117,10 +118,9 @@ exports.updateVet = async (req, res) => {
       deleteImages
     );
 
-    vet.checkupDate = checkupDateUTC;
-    vet.payment = payment;
-    vet.otherExpense = otherExpense;
-    vet.details = details;
+    vet.payment = payment ? payment : vet.payment;
+    vet.otherExpense = otherExpense ? otherExpense : vet.otherExpense;
+    vet.details = details ? details : vet.details;
 
     await vet.save();
     return res.status(200).json(ApiResponse(vet, "Vet updated successfully"));

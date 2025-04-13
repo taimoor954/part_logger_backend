@@ -3,7 +3,7 @@ const { checkSubscription } = require("../../middleware/subscription");
 const { uploadMultiple } = require("../../middleware/upload");
 const {
   addTravelExpense,
-  updateExpense,
+  updateTravelExpense,
   getExpense,
   getExpenses,
   deleteTravelExpense,
@@ -26,7 +26,7 @@ router.put(
   userRoute,
   checkSubscription,
   uploadMultiple,
-  updateExpense
+  updateTravelExpense
 );
 
 router.get("/getExpenses", userRoute, checkSubscription, getExpenses);

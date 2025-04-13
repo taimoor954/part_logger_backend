@@ -1,21 +1,40 @@
 const {
   getAccidentsByIds,
   deleteAccident,
+  updateAccident,
 } = require("../controllers/accident");
 const {
   getAutoPartsByUser,
   deleteAutoPart,
+  updateAutoPart,
 } = require("../controllers/autoPart");
-const { getEquipments, deleteEquipment } = require("../controllers/equipment");
-const { getGasExpenses, deleteGasExpense } = require("../controllers/gas");
+const {
+  getEquipments,
+  deleteEquipment,
+  updateEquipment,
+} = require("../controllers/equipment");
+const {
+  getGasExpenses,
+  deleteGasExpense,
+  updateGasExpense,
+} = require("../controllers/gas");
 const {
   getMaintenances,
   deleteMaintenance,
+  updateMaintenance,
 } = require("../controllers/maintenance");
-const { getPets, deletePet } = require("../controllers/pet");
-const { getRepairsByUser, deleteRepair } = require("../controllers/repair");
-const { getExpenses, deleteTravelExpense } = require("../controllers/travel");
-const { getVets, deleteVet } = require("../controllers/vet");
+const { getPets, deletePet, updatePet } = require("../controllers/pet");
+const {
+  getRepairsByUser,
+  deleteRepair,
+  updateRepair,
+} = require("../controllers/repair");
+const {
+  getExpenses,
+  deleteTravelExpense,
+  updateTravelExpense,
+} = require("../controllers/travel");
+const { getVets, deleteVet, updateVet } = require("../controllers/vet");
 const { ApiResponse } = require("../helpers");
 
 exports.checkRecordType = async (req, res, next) => {
@@ -118,6 +137,58 @@ exports.checkDeleteRecord = async (req, res, next) => {
       case "SMALL":
       case "TOOL":
         await deleteEquipment(req, res);
+        break;
+      default:
+        return res
+          .status(400)
+          .json(ApiResponse({}, "Invalid category type", false));
+    }
+  } catch (error) {
+    return res.status(500).json(ApiResponse({}, error.message, false));
+  }
+};
+
+exports.checkUpdateRecord = async (req, res, next) => {
+  const { type } = req.query;
+  console.log(req.body);
+
+  try {
+    if (!type) {
+      return res
+        .status(400)
+        .json(ApiResponse({}, "Missing record type", false));
+    }
+
+    switch (type.toUpperCase()) {
+      case "AUTOPART":
+        await updateAutoPart(req, res);
+        break;
+      case "REPAIR":
+        await updateRepair(req, res);
+        break;
+      case "MAINTENANCE":
+        await updateMaintenance(req, res);
+        break;
+      case "ACCIDENT":
+        await updateAccident(req, res);
+        break;
+      case "GAS":
+        await updateGasExpense(req, res);
+        break;
+      case "TRAVEL":
+        await updateTravelExpense(req, res);
+        break;
+      case "PET":
+        await updatePet(req, res);
+        break;
+      case "VET":
+        await updateVet(req, res);
+        break;
+      case "HEAVY":
+      case "HOME":
+      case "SMALL":
+      case "TOOL":
+        await updateEquipment(req, res);
         break;
       default:
         return res

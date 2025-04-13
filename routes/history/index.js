@@ -5,7 +5,9 @@ const {
   checkRecordType,
   checkOtherRecordType,
   checkDeleteRecord,
+  checkUpdateRecord,
 } = require("../../middleware/history");
+const { uploadMultiple } = require("../../middleware/upload");
 
 const router = express.Router();
 
@@ -21,6 +23,14 @@ router.delete(
   userRoute,
   checkSubscription,
   checkDeleteRecord
+);
+
+router.put(
+  "/updateRecord/:id",
+  userRoute,
+  checkSubscription,
+  uploadMultiple,
+  checkUpdateRecord
 );
 
 module.exports = router;

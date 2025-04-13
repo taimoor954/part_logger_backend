@@ -65,8 +65,13 @@ exports.updateEquipment = async (req, res) => {
   const { equipmentName, equipmentType, purchaseDate, price, deleteImages } =
     req.body;
   const userId = req.user._id;
+  const { type } = req?.query;
   try {
-    const equipment = await Equipment.findOne({ _id: req.params.id, userId });
+    const equipment = await Equipment.findOne({
+      _id: req.params.id,
+      userId,
+      equipmentType: type,
+    });
 
     if (!equipment) {
       return res
@@ -107,10 +112,13 @@ exports.updateEquipment = async (req, res) => {
       deleteImages
     );
 
-    equipment.equipmentName = equipmentName;
-    equipment.equipmentType = equipmentType;
-    equipment.purchaseDate = purchaseDateUTC;
-    equipment.price = price;
+    equipment.equipmentName = equipmentName
+      ? equipmentName
+      : equipment.equipmentName;
+    equipment.equipmentType = equipmentType
+      ? equipmentType
+      : equipment.equipmentType;
+    equipment.price = price ? price : equipment.price;
 
     await equipment.save();
     return res.status(200).json(ApiResponse(equipment, "Equipment updated"));

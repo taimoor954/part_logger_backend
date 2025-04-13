@@ -94,10 +94,10 @@ exports.updatePet = async (req, res) => {
     price,
     deleteImages,
   } = req.body;
-  const { petId } = req.params;
+  const { id } = req.params;
   try {
     const pet = await Pet.findOne({
-      _id: petId,
+      _id: id,
       userId: req.user._id,
     });
 

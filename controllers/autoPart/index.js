@@ -103,6 +103,8 @@ exports.updateAutoPart = async (req, res) => {
     const { vehicleId, storeId, sellerId, deletedImages, buyingDate } =
       req.body;
 
+    console.log(req.body);
+
     // Find the AutoPart by ID and user ID
     const autoPart = await AutoPart.findOne({ _id: id, userId });
     if (!autoPart) {
@@ -311,7 +313,7 @@ exports.deleteAutoPart = async (req, res) => {
       _id: id,
       userId: req.user._id,
     });
-    
+
     if (!autoPart) {
       return res
         .status(404)

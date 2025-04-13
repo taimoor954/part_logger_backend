@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.post("/addPet", userRoute, checkSubscription, uploadMultiple, addPet);
 router.put(
-  "/updatePet/:petId",
+  "/updatePet/:id",
   userRoute,
   checkSubscription,
   uploadMultiple,
