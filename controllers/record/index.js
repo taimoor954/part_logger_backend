@@ -18,8 +18,15 @@ exports.addRecord = async (req, res) => {
       return res.status(404).json(ApiResponse({}, "Category not found", false));
     }
 
-    data = JSON.parse(data);
-    console.log(data);
+    try {
+      data = JSON.parse(data);
+    } catch (error) {
+      return res
+        .status(400)
+        .json(
+          ApiResponse({}, "Invalid data format. Expected a JSON string.", false)
+        );
+    }
 
     // Validate if `data` is an array
     if (!Array.isArray(data) || data.length === 0) {
@@ -131,9 +138,7 @@ exports.addRecord = async (req, res) => {
       .json(ApiResponse(newRecord, "Record added successfully", true));
   } catch (error) {
     console.error(error);
-    return res
-      .status(500)
-      .json(ApiResponse({}, "Internal server error", false));
+    return res.status(500).json(ApiResponse({}, "Internal server error", false));
   }
 };
 
