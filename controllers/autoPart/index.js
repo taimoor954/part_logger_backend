@@ -11,6 +11,7 @@ const Vehicle = require("../../models/Vehicle");
 const moment = require("moment");
 const fs = require("fs");
 const { default: mongoose } = require("mongoose");
+const { deleteDraftById } = require("../draft");
 
 exports.addAutoPart = async (req, res) => {
   const {
@@ -39,6 +40,8 @@ exports.addAutoPart = async (req, res) => {
     if (!vehicle) {
       return res.status(404).json(ApiResponse({}, "Vehicle not found", false));
     }
+
+    await deleteDraftById(req.query?.draftId, req.user._id);
 
     // Validate store existence
     const store = await Store.findOne({ _id: storeId, userId: req.user._id });

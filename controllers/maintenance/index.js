@@ -11,6 +11,7 @@ const Vehicle = require("../../models/Vehicle");
 const Store = require("../../models/Store");
 const Maintenance = require("../../models/Maintenance");
 const AutoPart = require("../../models/AutoPart");
+const { deleteDraftById } = require("../draft");
 
 exports.addMaintenance = async (req, res) => {
   const userId = req.user._id;
@@ -44,6 +45,8 @@ exports.addMaintenance = async (req, res) => {
     if (!vehicle) {
       return res.status(404).json(ApiResponse({}, "Vehicle not found", false));
     }
+
+    await deleteDraftById(req.query?.draftId, req.user._id);
 
     // Verify if the store exists
     const store = await Store.findOne({ _id: storeId, userId });

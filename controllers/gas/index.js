@@ -7,6 +7,7 @@ const {
   deleteAttachments,
 } = require("../../helpers");
 const { default: mongoose } = require("mongoose");
+const { deleteDraftById } = require("../draft");
 
 exports.addGasExpense = async (req, res) => {
   const userId = req.user._id;
@@ -18,6 +19,8 @@ exports.addGasExpense = async (req, res) => {
     if (!vehicle) {
       return res.status(404).json(ApiResponse({}, "Vehicle not found", false));
     }
+
+    await deleteDraftById(req.query?.draftId, req.user._id);
 
     // Validate gas date
     let gasDateUTC = null;

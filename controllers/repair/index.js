@@ -12,6 +12,7 @@ const Store = require("../../models/Store");
 const Vehicle = require("../../models/Vehicle");
 const exp = require("constants");
 const { default: mongoose } = require("mongoose");
+const { deleteDraftById } = require("../draft");
 
 exports.addRepair = async (req, res) => {
   let {
@@ -38,6 +39,8 @@ exports.addRepair = async (req, res) => {
     if (!vehicle) {
       return res.status(404).json(ApiResponse({}, "Vehicle not found", false));
     }
+
+    await deleteDraftById(req.query?.draftId, req.user._id);
 
     // Validate if the store exists for the user
     const store = await Store.findOne({ _id: storeId, userId: req.user._id });

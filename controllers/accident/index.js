@@ -7,6 +7,7 @@ const {
 } = require("../../helpers");
 const Accident = require("../../models/Accident");
 const Vehicle = require("../../models/Vehicle");
+const { deleteDraftById } = require("../draft");
 
 exports.addAccident = async (req, res) => {
   const userId = req.user._id;
@@ -33,6 +34,8 @@ exports.addAccident = async (req, res) => {
     if (!vehicle) {
       return res.status(404).json(ApiResponse({}, "Vehicle not found", false));
     }
+
+    await deleteDraftById(req.query?.draftId, req.user._id);
 
     // Accident date should be in the past and converted to UTC
     let accidentDateUTC;
