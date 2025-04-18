@@ -20,8 +20,6 @@ exports.addGasExpense = async (req, res) => {
       return res.status(404).json(ApiResponse({}, "Vehicle not found", false));
     }
 
-    await deleteDraftById(req.query?.draftId, req.user._id);
-
     // Validate gas date
     let gasDateUTC = null;
     if (gasDate) {
@@ -45,9 +43,15 @@ exports.addGasExpense = async (req, res) => {
       }
     }
 
-    const attachments = req.files?.gallery
-      ? handleFileOperations([], req.files.gallery, null)
-      : [];
+    // Handle attachments (gallery files)
+    const draft = await deleteDraftById(req.query?.draftId, req.user._id);
+
+    // Handle attachments (gallery files)
+    const attachments = handleFileOperations(
+      draft?.attachments ? draft.attachments : [],
+      req.files?.gallery,
+      req.query?.deletedImages
+    );
 
     const gas = new Gas({
       userId,

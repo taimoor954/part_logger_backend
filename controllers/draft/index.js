@@ -18,16 +18,12 @@ exports.deleteDraftById = async (draftId, userId) => {
       userId,
     });
 
-    if (!draft) {
-      return ApiResponse({}, "Draft not found", false);
-    }
+    console.log(draft);
 
-    deleteAttachments(draft.attachments);
-
-    return ApiResponse(draft, "Draft deleted successfully", true);
+    return draft;
   } catch (error) {
     console.error("Error deleting draft:", error);
-    return ApiResponse({}, error, false);
+    return null;
   }
 };
 

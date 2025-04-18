@@ -35,8 +35,6 @@ exports.addAccident = async (req, res) => {
       return res.status(404).json(ApiResponse({}, "Vehicle not found", false));
     }
 
-    await deleteDraftById(req.query?.draftId, req.user._id);
-
     // Accident date should be in the past and converted to UTC
     let accidentDateUTC;
     if (accidentDate) {
@@ -55,9 +53,14 @@ exports.addAccident = async (req, res) => {
     }
 
     // Handle attachments (gallery files)
-    const attachments = req.files?.gallery
-      ? handleFileOperations([], req.files.gallery, null)
-      : [];
+    const draft = await deleteDraftById(req.query?.draftId, req.user._id);
+
+    // Handle attachments (gallery files)
+    const attachments = handleFileOperations(
+      draft?.attachments ? draft.attachments : [],
+      req.files?.gallery,
+      req.query?.deletedImages
+    );
 
     // Create the accident record
     const accident = new Accident({

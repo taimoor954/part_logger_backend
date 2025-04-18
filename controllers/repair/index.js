@@ -40,8 +40,6 @@ exports.addRepair = async (req, res) => {
       return res.status(404).json(ApiResponse({}, "Vehicle not found", false));
     }
 
-    await deleteDraftById(req.query?.draftId, req.user._id);
-
     // Validate if the store exists for the user
     const store = await Store.findOne({ _id: storeId, userId: req.user._id });
     if (!store) {
@@ -83,6 +81,15 @@ exports.addRepair = async (req, res) => {
       return { name: repair };
     });
 
+    const draft = await deleteDraftById(req.query?.draftId, req.user._id);
+
+    // Handle attachments (gallery files)
+    const attachments = handleFileOperations(
+      draft?.attachments ? draft.attachments : [],
+      req.files?.gallery,
+      req.query?.deletedImages
+    );
+
     // Create a new Repair object
     const repair = new Repair({
       userId: req.user._id,
@@ -98,9 +105,7 @@ exports.addRepair = async (req, res) => {
         laborCost,
         repairPartsCost,
         totalRepairCost,
-        attachments: req.files.gallery
-          ? req.files.gallery.map((image) => image.filename)
-          : [],
+        attachments,
       },
     });
 

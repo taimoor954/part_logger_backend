@@ -46,8 +46,6 @@ exports.addMaintenance = async (req, res) => {
       return res.status(404).json(ApiResponse({}, "Vehicle not found", false));
     }
 
-    await deleteDraftById(req.query?.draftId, req.user._id);
-
     // Verify if the store exists
     const store = await Store.findOne({ _id: storeId, userId });
     if (!store) {
@@ -110,9 +108,14 @@ exports.addMaintenance = async (req, res) => {
     }
 
     // Handle attachments (gallery files)
-    const attachments = req.files?.gallery
-      ? handleFileOperations([], req.files.gallery, null)
-      : [];
+    const draft = await deleteDraftById(req.query?.draftId, req.user._id);
+
+    // Handle attachments (gallery files)
+    const attachments = handleFileOperations(
+      draft?.attachments ? draft.attachments : [],
+      req.files?.gallery,
+      req.query?.deletedImages
+    );
 
     // Create a new maintenance record
     const maintenance = new Maintenance({

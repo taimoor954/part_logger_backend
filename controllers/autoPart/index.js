@@ -41,8 +41,6 @@ exports.addAutoPart = async (req, res) => {
       return res.status(404).json(ApiResponse({}, "Vehicle not found", false));
     }
 
-    await deleteDraftById(req.query?.draftId, req.user._id);
-
     // Validate store existence
     const store = await Store.findOne({ _id: storeId, userId: req.user._id });
     if (!store) {
@@ -61,8 +59,14 @@ exports.addAutoPart = async (req, res) => {
     // Convert buying date to UTC
     const buyingDateUTC = buyingDate ? convertToUTCDate(buyingDate) : undefined;
 
+    const draft = await deleteDraftById(req.query?.draftId, req.user._id);
+
     // Handle attachments (gallery files)
-    const attachments = handleFileOperations([], req.files?.gallery, null);
+    const attachments = handleFileOperations(
+      draft?.attachments ? draft.attachments : [],
+      req.files?.gallery,
+      req.query?.deletedImages
+    );
 
     // Create a new auto part
     const autoPart = new AutoPart({
