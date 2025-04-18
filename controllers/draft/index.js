@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const {
   ApiResponse,
   handleFileOperations,
@@ -5,6 +6,7 @@ const {
   deleteAttachments,
 } = require("../../helpers");
 const Draft = require("../../models/Draft");
+const Vehicle = require("../../models/Vehicle");
 
 exports.deleteDraftById = async (draftId, userId) => {
   try {
@@ -31,10 +33,19 @@ exports.deleteDraftById = async (draftId, userId) => {
 
 exports.createDraft = async (req, res) => {
   try {
-    const { title } = req.body;
+    const { title, vehicleId } = req.body;
 
-    if (!title) {
-      return res.status(400).json(ApiResponse({}, "Title is required", false));
+    // if (!title) {
+    //   return res.status(400).json(ApiResponse({}, "Title is required", false));
+    // }
+
+    const vehicle = await Vehicle.findOne({
+      _id: vehicleId,
+      userId: req.user._id,
+    });
+
+    if (!vehicle) {
+      return res.status(400).json(ApiResponse({}, "Vehicle not found", false));
     }
 
     const attachments = req.files?.gallery
@@ -45,6 +56,7 @@ exports.createDraft = async (req, res) => {
       userId: req.user._id,
       title,
       attachments,
+      vehicleId,
     });
 
     await draft.save();
@@ -62,7 +74,7 @@ exports.getDrafts = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const userId = req.user._id;
-  let { startDate, endDate } = req.query;
+  let { startDate, endDate, vehicleId } = req.query;
   try {
     let finalAggregate = [];
 
@@ -71,6 +83,30 @@ exports.getDrafts = async (req, res) => {
         userId: userId,
       },
     });
+
+    if (vehicleId) {
+      finalAggregate.push({
+        $match: {
+          vehicleId: new mongoose.Types.ObjectId(vehicleId),
+        },
+      });
+
+      finalAggregate.push({
+        $lookup: {
+          from: "vehicles",
+          localField: "vehicleId",
+          foreignField: "_id",
+          as: "vehicle",
+        },
+      });
+
+      finalAggregate.push({
+        $unwind: {
+          path: "$vehicle",
+          preserveNullAndEmptyArrays: true,
+        },
+      });
+    }
 
     if (startDate) {
       startDate = convertToUTCDate(startDate);
@@ -107,7 +143,7 @@ exports.getDrafts = async (req, res) => {
 exports.getDraftById = async (req, res) => {
   const { id } = req.params;
   try {
-    const draft = await Draft.findById(id);
+    const draft = await Draft.findById(id).populate("vehicleId");
 
     if (!draft) {
       return res.status(404).json(ApiResponse({}, "Draft not found", false));
