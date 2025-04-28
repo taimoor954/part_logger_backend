@@ -22,5 +22,7 @@ router.use("/equipment", require("./equipment"));
 router.use("/category", require("./category"));
 router.use("/record", require("./record"));
 router.use("/history", require("./history"));
+router.use("/vehicleService", require("./vehicleService"));
+router.use("/vehicleType", require("./vehicleType"));
 router.use("/draft", require("./draft"));
 module.exports = router;
