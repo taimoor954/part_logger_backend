@@ -28,6 +28,16 @@ const equipmentSchema = new Schema(
       type: Number,
       required: true,
     },
+    warranty: {
+      type: String,
+      enum: ["YES", "NO", "NOT_APPLICABLE"],
+    },
+    warrantyTime: {
+      type: String,
+    },
+    warrantyExpiration: {
+      type: Date,
+    },
     attachments: {
       type: [String],
     },

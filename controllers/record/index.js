@@ -9,7 +9,7 @@ const Record = require("../../models/Record");
 
 exports.addRecord = async (req, res) => {
   const userId = req.user._id;
-  let { categoryId, data } = req.body;
+  let { categoryId, data, description } = req.body;
 
   try {
     // Validate if category exists for the user
@@ -129,6 +129,7 @@ exports.addRecord = async (req, res) => {
       categoryId,
       data,
       attachments,
+      description,
     });
 
     await newRecord.save();
@@ -138,13 +139,15 @@ exports.addRecord = async (req, res) => {
       .json(ApiResponse(newRecord, "Record added successfully", true));
   } catch (error) {
     console.error(error);
-    return res.status(500).json(ApiResponse({}, "Internal server error", false));
+    return res
+      .status(500)
+      .json(ApiResponse({}, "Internal server error", false));
   }
 };
 
 exports.updateRecord = async (req, res) => {
   const userId = req.user._id;
-  let { data, attachments, removeAttachments } = req.body;
+  let { data, attachments, removeAttachments, description } = req.body;
   const { recordId } = req.params;
 
   try {
@@ -260,6 +263,10 @@ exports.updateRecord = async (req, res) => {
           );
       }
       record.attachments = updatedAttachments;
+    }
+
+    if (description) {
+      record.description = description;
     }
 
     await record.save();

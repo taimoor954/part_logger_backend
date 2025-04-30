@@ -29,6 +29,8 @@ exports.addVehicleService = async (req, res) => {
     partsCost,
     laborCost,
     warranty,
+    warrantyTime,
+    warrantyExpiration,
     warrantyPrice,
     comment,
   } = req.body;
@@ -87,6 +89,30 @@ exports.addVehicleService = async (req, res) => {
       req.query?.deletedImages
     );
 
+    if (warranty === "YES") {
+      if (!warrantyTime) {
+        return res
+          .status(400)
+          .json(ApiResponse({}, "Warranty time is required", false));
+      }
+      if (!warrantyExpiration) {
+        return res
+          .status(400)
+          .json(ApiResponse({}, "Warranty expiration date is required", false));
+      }
+      if (new Date(warrantyExpiration) < new Date()) {
+        return res
+          .status(400)
+          .json(
+            ApiResponse(
+              {},
+              "Warranty expiration date should be in the future",
+              false
+            )
+          );
+      }
+    }
+
     // Create the vehicle service
     const vehicleService = new VehicleService({
       userId,
@@ -104,6 +130,8 @@ exports.addVehicleService = async (req, res) => {
       partsCost,
       laborCost,
       warranty,
+      warrantyTime,
+      warrantyExpiration,
       warrantyPrice,
       comment,
       attachments,
@@ -142,6 +170,8 @@ exports.updateVehicleService = async (req, res) => {
     laborCost,
     warranty,
     warrantyPrice,
+    warrantyTime,
+    warrantyExpiration,
     comment,
   } = req.body;
 
@@ -241,6 +271,9 @@ exports.updateVehicleService = async (req, res) => {
     vehicleService.warrantyPrice =
       warrantyPrice ?? vehicleService.warrantyPrice;
     vehicleService.comment = comment ?? vehicleService.comment;
+    vehicleService.warrantyTime = warrantyTime ?? vehicleService.warrantyTime;
+    vehicleService.warrantyExpiration =
+      warrantyExpiration ?? vehicleService.warrantyExpiration;
 
     await vehicleService.save();
 

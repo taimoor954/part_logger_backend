@@ -59,7 +59,13 @@ const vehicleServiceSchema = new Schema(
     },
     warranty: {
       type: String,
-      enum: ["YES", "NO", "NOT APPLICABLE"],
+      enum: ["YES", "NO", "NOT_APPLICABLE"],
+    },
+    warrantyTime: {
+      type: String,
+    },
+    warrantyExpiration: {
+      type: Date,
     },
     warrantyPrice: {
       type: Number,

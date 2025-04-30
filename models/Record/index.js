@@ -21,6 +21,9 @@ const recordSchema = new Schema(
         value: { type: mongoose.Schema.Types.Mixed, required: true },
       },
     ],
+    description: {
+      type: String,
+    },
     attachments: {
       type: [String],
     },
