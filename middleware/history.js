@@ -34,6 +34,11 @@ const {
   deleteTravelExpense,
   updateTravelExpense,
 } = require("../controllers/travel");
+const {
+  getVehicleServices,
+  deleteVehicleService,
+  updateVehicleService,
+} = require("../controllers/vehicleService");
 const { getVets, deleteVet, updateVet } = require("../controllers/vet");
 const { ApiResponse } = require("../helpers");
 
@@ -42,6 +47,9 @@ exports.checkRecordType = async (req, res, next) => {
 
   try {
     switch (type.toUpperCase()) {
+      case "VEHICLE_SERVICE":
+        await getVehicleServices(req, res);
+        break;
       case "AUTOPART":
         await getAutoPartsByUser(req, res);
         break;
@@ -56,6 +64,21 @@ exports.checkRecordType = async (req, res, next) => {
         break;
       case "GAS":
         await getGasExpenses(req, res);
+        break;
+      case "TRAVEL":
+        await getExpenses(req, res);
+        break;
+      case "PET":
+        await getPets(req, res);
+        break;
+      case "VET":
+        await getVets(req, res);
+        break;
+      case "HEAVY":
+      case "HOME":
+      case "SMALL":
+      case "TOOL":
+        await getEquipments(req, res);
         break;
       default:
         return res
@@ -108,6 +131,9 @@ exports.checkDeleteRecord = async (req, res, next) => {
     }
 
     switch (type.toUpperCase()) {
+      case "VEHICLE_SERVICE":
+        await deleteVehicleService(req, res);
+        break;
       case "AUTOPART":
         await deleteAutoPart(req, res);
         break;
@@ -160,6 +186,9 @@ exports.checkUpdateRecord = async (req, res, next) => {
     }
 
     switch (type.toUpperCase()) {
+      case "VEHICLE_SERVICE":
+        await updateVehicleService(req, res);
+        break;
       case "AUTOPART":
         await updateAutoPart(req, res);
         break;

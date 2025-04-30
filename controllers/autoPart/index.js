@@ -236,7 +236,7 @@ exports.getAutoPartsByUser = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const userId = req.user._id;
-  let { vehicleId, storeId, startDate, endDate } = req.query;
+  let { vehicleId, storeId, startDate, endDate, keyword } = req.query;
 
   try {
     let finalAggregate = [];

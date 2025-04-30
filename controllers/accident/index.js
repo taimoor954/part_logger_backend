@@ -213,7 +213,7 @@ exports.getAccidentsByIds = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const userId = req.user._id;
-  let { vehicleId, startDate, endDate } = req.query;
+  let { vehicleId, startDate, endDate, keyword } = req.query;
   try {
     let finalAggregate = [];
 
@@ -246,6 +246,25 @@ exports.getAccidentsByIds = async (req, res) => {
     });
 
     finalAggregate.push({ $unwind: "$vehicle" });
+
+    if (keyword) {
+      finalAggregate.push({
+        $match: {
+          $or: [
+            { location: { $regex: keyword, $options: "i" } },
+            {
+              "vehicle.vehicleDetails.make": { $regex: keyword, $options: "i" },
+            },
+            {
+              "vehicle.vehicleDetails.model": {
+                $regex: keyword,
+                $options: "i",
+              },
+            },
+          ],
+        },
+      });
+    }
 
     // Sort by accidentDate in descending order (latest first)
     finalAggregate.push({

@@ -26,9 +26,19 @@ const petSchema = new Schema(
       type: Date,
       required: true,
     },
+    description: {
+      type: String,
+      default: "",
+    },
     name: {
       type: String,
       required: true,
+    },
+    veterinarianName: {
+      type: String,
+    },
+    veterinarianPhone: {
+      type: String,
     },
     price: {
       type: Number,

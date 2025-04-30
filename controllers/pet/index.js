@@ -7,7 +7,16 @@ const {
 const Pet = require("../../models/Pet");
 
 exports.addPet = async (req, res) => {
-  const { specie, breed, dateOfBirth, purchaseDate, name, price } = req.body;
+  const {
+    specie,
+    breed,
+    dateOfBirth,
+    purchaseDate,
+    name,
+    price,
+    veterinarianName,
+    veterinarianPhone,
+  } = req.body;
   try {
     // Validate date of birth and purchase date
     let dateOfBirthUTC = null;
@@ -68,6 +77,8 @@ exports.addPet = async (req, res) => {
       breed,
       dateOfBirth: dateOfBirthUTC,
       purchaseDate: purchaseDateUTC,
+      veterinarianName,
+      veterinarianPhone,
       name,
       price,
       attachments,
@@ -205,7 +216,7 @@ exports.getPets = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const userId = req.user._id;
-  let { startDate, endDate } = req.query;
+  let { startDate, endDate, keyword } = req.query;
 
   try {
     let finalAggregate = [];
@@ -224,6 +235,18 @@ exports.getPets = async (req, res) => {
     if (endDate) {
       endDate = convertToUTCDate(endDate);
       finalAggregate.push({ $match: { purchaseDate: { $lte: endDate } } });
+    }
+
+    if (keyword) {
+      finalAggregate.push({
+        $match: {
+          $or: [
+            { name: { $regex: keyword, $options: "i" } },
+            { specie: { $regex: keyword, $options: "i" } },
+            { breed: { $regex: keyword, $options: "i" } },
+          ],
+        },
+      });
     }
 
     finalAggregate.push({

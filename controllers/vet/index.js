@@ -151,7 +151,7 @@ exports.getVets = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const userId = req.user._id;
-  let { startDate, endDate } = req.query;
+  let { startDate, endDate, keyword } = req.query;
   try {
     let finalAggregate = [];
 
@@ -182,6 +182,17 @@ exports.getVets = async (req, res) => {
     if (endDate) {
       endDate = convertToUTCDate(endDate);
       finalAggregate.push({ $match: { checkupDate: { $lte: endDate } } });
+    }
+
+    if (keyword) {
+      finalAggregate.push({
+        $match: {
+          $or: [
+            { "pet.name": { $regex: keyword, $options: "i" } },
+            { details: { $regex: keyword, $options: "i" } },
+          ],
+        },
+      });
     }
 
     finalAggregate.push({

@@ -157,7 +157,7 @@ exports.getEquipments = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const userId = req.user._id;
-  let { startDate, endDate, type } = req.query;
+  let { startDate, endDate, type, keyword } = req.query;
 
   try {
     let finalAggregate = [];
@@ -182,6 +182,14 @@ exports.getEquipments = async (req, res) => {
     if (type) {
       type = type.toUpperCase();
       finalAggregate.push({ $match: { equipmentType: type } });
+    }
+
+    if (keyword) {
+      finalAggregate.push({
+        $match: {
+          $or: [{ equipmentName: { $regex: keyword, $options: "i" } }],
+        },
+      });
     }
 
     finalAggregate.push({

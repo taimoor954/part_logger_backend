@@ -174,7 +174,7 @@ exports.deleteGasExpense = async (req, res) => {
 
 exports.getGasExpenses = async (req, res) => {
   const userId = req.user._id;
-  let { vehicleId, startDate, endDate, page, limit } = req.query;
+  let { vehicleId, startDate, endDate, page, limit, keyword } = req.query;
 
   try {
     let finalAggregate = [];
@@ -215,6 +215,24 @@ exports.getGasExpenses = async (req, res) => {
     finalAggregate.push({
       $unwind: "$vehicle",
     });
+
+    if (keyword) {
+      finalAggregate.push({
+        $match: {
+          $or: [
+            {
+              "vehicle.vehicleDetails.make": { $regex: keyword, $options: "i" },
+            },
+            {
+              "vehicle.vehicleDetails.model": {
+                $regex: keyword,
+                $options: "i",
+              },
+            },
+          ],
+        },
+      });
+    }
 
     finalAggregate.push({
       $project: {

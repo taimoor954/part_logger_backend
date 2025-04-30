@@ -300,7 +300,7 @@ exports.getVehicleServices = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const userId = req.user._id;
-  let { vehicleId, storeId, startDate, endDate } = req.query;
+  let { vehicleId, storeId, startDate, endDate, keyword } = req.query;
   try {
     let finalAggregate = [];
 
@@ -361,6 +361,26 @@ exports.getVehicleServices = async (req, res) => {
     finalAggregate.push({ $unwind: "$vehicle" });
     finalAggregate.push({ $unwind: "$store" });
     finalAggregate.push({ $unwind: "$mechanic" });
+
+    if (keyword) {
+      finalAggregate.push({
+        $match: {
+          $or: [
+            {
+              "vehicle.vehicleDetails.make": { $regex: keyword, $options: "i" },
+            },
+            {
+              "vehicle.vehicleDetails.model": {
+                $regex: keyword,
+                $options: "i",
+              },
+            },
+            { "store.storeName": { $regex: keyword, $options: "i" } },
+            { "mechanic.name": { $regex: keyword, $options: "i" } },
+          ],
+        },
+      });
+    }
 
     const myAggregate =
       finalAggregate.length > 0

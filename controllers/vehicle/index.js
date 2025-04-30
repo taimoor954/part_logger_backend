@@ -8,6 +8,7 @@ const Vehicle = require("../../models/Vehicle");
 const Subscription = require("../../models/Subscription");
 const moment = require("moment");
 const fs = require("fs");
+const VehicleType = require("../../models/VehicleType");
 
 exports.addVehicle = async (req, res) => {
   const {
@@ -16,14 +17,18 @@ exports.addVehicle = async (req, res) => {
     model,
     year,
     VIN,
-    entryDate,
+    purchaseDate,
     description,
     engineSize,
-    type,
     cylinders,
-    hasTurboCharger,
-    transmissionNum,
+    turboCharger,
     transmissionType,
+    engineOilType,
+    engineCoolantType,
+    transmissionFluidType,
+    transmissionSpeed,
+    tireSize,
+    tirePressure,
     carMilage,
     notes,
     fuel,
@@ -58,7 +63,16 @@ exports.addVehicle = async (req, res) => {
         );
     }
 
-    const entryDateUTC = entryDate ? convertToUTCDate(entryDate) : undefined;
+    const vehicleTypeObj = await VehicleType.findById(vehicleType);
+    if (!vehicleTypeObj) {
+      return res
+        .status(400)
+        .json(ApiResponse({}, "Vehicle type does not exist", false));
+    }
+
+    const purchaseDateUTC = purchaseDate
+      ? convertToUTCDate(purchaseDate)
+      : undefined;
     const gallery = req.files.gallery
       ? req.files.gallery.map((image) => image.filename)
       : [];
@@ -67,24 +81,28 @@ exports.addVehicle = async (req, res) => {
 
     const vehicle = new Vehicle({
       userId: req.user._id,
-      vehicleType,
+      vehicleType: vehicleTypeObj._id,
       vehicleDetails: {
         make,
         model,
         year,
         VIN,
-        entryDate: entryDateUTC,
+        purchaseDate: purchaseDateUTC,
         description,
       },
       additionalDetails: {
         engineSize,
-        type,
         cylinders,
-        hasTurboCharger,
+        turboCharger,
         fuel,
         driveTrain,
-        transmissionNum,
         transmissionType,
+        engineOilType,
+        engineCoolantType,
+        transmissionFluidType,
+        transmissionSpeed,
+        tireSize,
+        tirePressure,
         carMilage,
         notes,
       },
@@ -108,7 +126,8 @@ exports.updateVehicle = async (req, res) => {
     const vehicle = await Vehicle.findOne({
       _id: req.params.id,
       userId: req.user._id,
-    });
+    }).populate("vehicleType");
+
     if (!vehicle) {
       return res.status(404).json(ApiResponse({}, "Vehicle not found", false));
     }
@@ -117,19 +136,15 @@ exports.updateVehicle = async (req, res) => {
     const updateField = (currentValue, newValue) =>
       newValue !== undefined ? newValue : currentValue;
 
-    vehicle.vehicleType = updateField(
-      vehicle.vehicleType,
-      req.body.vehicleType
-    );
     vehicle.vehicleDetails = {
       ...vehicle.vehicleDetails,
       make: updateField(vehicle.vehicleDetails.make, req.body.make),
       model: updateField(vehicle.vehicleDetails.model, req.body.model),
       year: updateField(vehicle.vehicleDetails.year, req.body.year),
       VIN: updateField(vehicle.vehicleDetails.VIN, req.body.VIN),
-      entryDate: req.body.entryDate
-        ? convertToUTCDate(req.body.entryDate)
-        : vehicle.vehicleDetails.entryDate,
+      purchaseDate: req.body.purchaseDate
+        ? convertToUTCDate(req.body.purchaseDate)
+        : vehicle.vehicleDetails.purchaseDate,
       description: updateField(
         vehicle.vehicleDetails.description,
         req.body.description
@@ -142,18 +157,37 @@ exports.updateVehicle = async (req, res) => {
         vehicle.additionalDetails.engineSize,
         req.body.engineSize
       ),
-      type: updateField(vehicle.additionalDetails.type, req.body.type),
       cylinders: updateField(
         vehicle.additionalDetails.cylinders,
         req.body.cylinders
       ),
-      hasTurboCharger: updateField(
-        vehicle.additionalDetails.hasTurboCharger,
-        req.body.hasTurboCharger
+      turboCharger: updateField(
+        vehicle.additionalDetails.turboCharger,
+        req.body.turboCharger
       ),
-      transmissionNum: updateField(
-        vehicle.additionalDetails.transmissionNum,
-        req.body.transmissionNum
+      engineOilType: updateField(
+        vehicle.additionalDetails.engineOilType,
+        req.body.engineOilType
+      ),
+      engineCoolantType: updateField(
+        vehicle.additionalDetails.engineCoolantType,
+        req.body.engineCoolantType
+      ),
+      transmissionFluidType: updateField(
+        vehicle.additionalDetails.transmissionFluidType,
+        req.body.transmissionFluidType
+      ),
+      transmissionSpeed: updateField(
+        vehicle.additionalDetails.transmissionSpeed,
+        req.body.transmissionSpeed
+      ),
+      tireSize: updateField(
+        vehicle.additionalDetails.tireSize,
+        req.body.tireSize
+      ),
+      tirePressure: updateField(
+        vehicle.additionalDetails.tirePressure,
+        req.body.tirePressure
       ),
       transmissionType: updateField(
         vehicle.additionalDetails.transmissionType,
@@ -196,7 +230,7 @@ exports.getVehicle = async (req, res) => {
     const vehicle = await Vehicle.findOne({
       _id: req.params.id,
       userId: req.user._id,
-    });
+    }).populate("vehicleType");
     if (!vehicle) {
       return res.status(404).json(ApiResponse({}, "Vehicle not found", false));
     }
@@ -209,7 +243,9 @@ exports.getVehicle = async (req, res) => {
 
 exports.getVehicleByUser = async (req, res) => {
   try {
-    const vehicles = await Vehicle.find({ userId: req.user._id });
+    const vehicles = await Vehicle.find({ userId: req.user._id }).populate(
+      "vehicleType"
+    );
     return res.status(200).json(ApiResponse(vehicles, "Vehicles found", true));
   } catch (error) {
     return res.status(500).json(ApiResponse({}, error.message, false));

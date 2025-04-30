@@ -180,7 +180,7 @@ exports.getExpenses = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const userId = req.user._id;
-  let { startDate, endDate } = req.query;
+  let { startDate, endDate, keyword } = req.query;
 
   try {
     let matchQuery = { userId };
@@ -204,6 +204,13 @@ exports.getExpenses = async (req, res) => {
       } else {
         return res.status(400).json(ApiResponse({}, "Invalid endDate", false));
       }
+    }
+
+    if (keyword) {
+      matchQuery.$or = [
+        { from: { $regex: keyword, $options: "i" } },
+        { to: { $regex: keyword, $options: "i" } },
+      ];
     }
 
     const myAggregate = Travel.aggregate([

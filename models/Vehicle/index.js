@@ -19,15 +19,16 @@ const vehicleDetailsSchema = new Schema(
     },
     VIN: {
       type: String,
-      required: true,
+      default: "",
     },
-    entryDate: {
+    purchaseDate: {
       type: Date,
-      required: true,
+      default: null,
     },
     description: {
       type: String,
       required: false,
+      default: "",
     },
   },
   { timestamps: true }
@@ -37,46 +38,62 @@ const vehicleAdditionalDetailsSchema = new Schema(
   {
     engineSize: {
       type: Number,
-      required: true,
-    },
-    type: {
-      type: String,
-      required: true,
     },
     cylinders: {
       type: Number,
-      required: true,
     },
-    hasTurboCharger: {
+    turboCharger: {
       type: Boolean,
-      required: true,
+      enum: ["NO", "SUPERCHARGER", "TURBO_CHARGER"],
     },
     fuel: {
       type: String,
-      required: true,
-      enum: ["GASOLINE", "DIESEL", "ELECTRIC", "HYBRID", "PROPANE"],
+      enum: ["GAS", "DIESEL", "ELECTRIC", "HYBRID", "PROPANE"],
     },
-    driveTrain: {
+    engineOilType: {
       type: String,
-      required: true,
-      enum: ["2WD", "4WD", "AWD"],
+      default: "",
     },
-    transmissionNum: {
-      type: Number,
-      required: true,
+    engineCoolantType: {
+      type: String,
+      default: "",
+    },
+    transmissionFluidType: {
+      type: String,
+      default: "",
     },
     transmissionType: {
       type: String,
-      required: true,
-      enum: ["MANUAL", "AUTOMATIC", "SEMI-AUTOMATIC", "CVT"],
+      enum: [
+        "MANUAL",
+        "AUTOMATIC",
+        "SEMI_AUTOMATIC",
+        "CVT",
+        "HYBRID",
+        "ELECTRIC_DRIVE",
+        "HYDROSTATIC",
+        "OTHER",
+      ],
+    },
+    transmissionSpeed: {
+      type: Number,
+    },
+    driveTrain: {
+      type: String,
+      enum: ["2WD", "4WD", "AWD"],
+    },
+    tireSize: {
+      type: Number,
+    },
+    tirePressure: {
+      type: Number,
     },
     carMilage: {
       type: Number,
-      required: true,
     },
     notes: {
       type: String,
-      required: false,
+      default: "",
     },
   },
   { timestamps: true }
@@ -90,9 +107,9 @@ const vehicleSchema = new Schema(
       required: true,
     },
     vehicleType: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "VehicleType",
       required: true,
-      enum: ["CAR", "TRUCK", "TRACTOR"],
     },
     vehicleDetails: {
       type: vehicleDetailsSchema,
@@ -100,7 +117,7 @@ const vehicleSchema = new Schema(
     },
     additionalDetails: {
       type: vehicleAdditionalDetailsSchema,
-      required: true,
+      required: false,
     },
     status: {
       type: String,
