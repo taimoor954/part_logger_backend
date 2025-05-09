@@ -16,6 +16,7 @@ exports.addPet = async (req, res) => {
     price,
     veterinarianName,
     veterinarianPhone,
+    description,
   } = req.body;
   try {
     // Validate date of birth and purchase date
@@ -82,6 +83,7 @@ exports.addPet = async (req, res) => {
       name,
       price,
       attachments,
+      description,
     });
 
     await pet.save();
@@ -104,6 +106,9 @@ exports.updatePet = async (req, res) => {
     name,
     price,
     deleteImages,
+    description,
+    veterinarianName,
+    veterinarianPhone,
   } = req.body;
   const { id } = req.params;
   try {
@@ -173,6 +178,13 @@ exports.updatePet = async (req, res) => {
     pet.breed = breed ? breed : pet.breed;
     pet.name = name ? name : pet.name;
     pet.price = price ? price : pet.price;
+    pet.veterinarianName = veterinarianName
+      ? veterinarianName
+      : pet.veterinarianName;
+    pet.veterinarianPhone = veterinarianPhone
+      ? veterinarianPhone
+      : pet.veterinarianPhone;
+    pet.description = description ? description : pet.description;
 
     pet.attachments = handleFileOperations(
       pet.attachments,
