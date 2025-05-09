@@ -45,9 +45,17 @@ const vehicleServiceSchema = new Schema(
       type: String,
       enum: ["NEW", "USED"],
     },
-    partNum: {
-      type: String,
-    },
+    partDescription: [
+      {
+        partNum: {
+          type: String,
+        },
+
+        partDesc: {
+          type: String,
+        },
+      },
+    ],
     repairPrice: {
       type: Number,
     },

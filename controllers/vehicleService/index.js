@@ -24,7 +24,7 @@ exports.addVehicleService = async (req, res) => {
     partBrand,
     currentMileage,
     condition,
-    partNum,
+    partDescription, // this is now correctly used
     repairPrice,
     partsCost,
     laborCost,
@@ -32,6 +32,7 @@ exports.addVehicleService = async (req, res) => {
     warrantyPrice,
     comment,
   } = req.body;
+
   try {
     if (
       !mongoose.isValidObjectId(vehicleId) ||
@@ -59,6 +60,21 @@ exports.addVehicleService = async (req, res) => {
     if (!worker) {
       return res.status(404).json(ApiResponse({}, "Worker not found", false));
     }
+
+    let parsedPartDescription = [];
+
+    try {
+      if (typeof partDescription === "string") {
+        parsedPartDescription = JSON.parse(partDescription);
+      } else if (Array.isArray(partDescription)) {
+        parsedPartDescription = partDescription;
+      }
+    } catch (err) {
+      return res
+        .status(400)
+        .json(ApiResponse({}, "Invalid format for partDescription", false));
+    }
+
     // Verify if the service date is valid
     let serviceDateUTC = null;
     if (serviceDate) {
@@ -80,7 +96,6 @@ exports.addVehicleService = async (req, res) => {
     // Handle attachments (gallery files)
     const draft = await deleteDraftById(req.query?.draftId, req.user._id);
 
-    // Handle attachments (gallery files)
     const attachments = handleFileOperations(
       draft?.attachments ? draft.attachments : [],
       req.files?.gallery,
@@ -99,7 +114,7 @@ exports.addVehicleService = async (req, res) => {
       partBrand,
       currentMileage,
       condition,
-      partNum,
+      partDescription: parsedPartDescription,
       repairPrice,
       partsCost,
       laborCost,
