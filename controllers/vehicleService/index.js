@@ -167,7 +167,7 @@ exports.addVehicleService = async (req, res) => {
 
 exports.updateVehicleService = async (req, res) => {
   const userId = req.user._id;
-  const vehicleServiceId = req.params.id; // Assuming you pass ID in params
+  const vehicleServiceId = req.params.id;
 
   const {
     vehicleId,
@@ -242,6 +242,23 @@ exports.updateVehicleService = async (req, res) => {
       }
     }
 
+    // Parse partDescription if provided
+    let parsedPartDescription = vehicleService.partDescription;
+
+    if (req.body.partDescription !== undefined) {
+      try {
+        if (typeof req.body.partDescription === "string") {
+          parsedPartDescription = JSON.parse(req.body.partDescription);
+        } else if (Array.isArray(req.body.partDescription)) {
+          parsedPartDescription = req.body.partDescription;
+        }
+      } catch (err) {
+        return res
+          .status(400)
+          .json(ApiResponse({}, "Invalid format for partDescription", false));
+      }
+    }
+
     // Validate serviceDate if provided
     let serviceDateUTC = vehicleService.serviceDate;
     if (serviceDate) {
@@ -278,7 +295,6 @@ exports.updateVehicleService = async (req, res) => {
     vehicleService.currentMileage =
       currentMileage ?? vehicleService.currentMileage;
     vehicleService.condition = condition ?? vehicleService.condition;
-    vehicleService.partNum = partNum ?? vehicleService.partNum;
     vehicleService.repairPrice = repairPrice ?? vehicleService.repairPrice;
     vehicleService.partsCost = partsCost ?? vehicleService.partsCost;
     vehicleService.laborCost = laborCost ?? vehicleService.laborCost;
@@ -289,6 +305,7 @@ exports.updateVehicleService = async (req, res) => {
     vehicleService.warrantyTime = warrantyTime ?? vehicleService.warrantyTime;
     vehicleService.warrantyExpiration =
       warrantyExpiration ?? vehicleService.warrantyExpiration;
+    vehicleService.partDescription = parsedPartDescription;
 
     await vehicleService.save();
 
