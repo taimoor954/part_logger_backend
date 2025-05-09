@@ -11,6 +11,7 @@ const Vehicle = require("../../models/Vehicle");
 const VehicleService = require("../../models/VehicleService");
 const Worker = require("../../models/Worker");
 const { deleteDraftById } = require("../draft");
+const AutoPart = require("../../models/AutoPart");
 
 exports.addVehicleService = async (req, res) => {
   const userId = req.user._id;
@@ -19,7 +20,7 @@ exports.addVehicleService = async (req, res) => {
     storeId,
     serviceDate,
     workerId,
-    partRepaired,
+    autoPartIds,
     description,
     partBrand,
     currentMileage,
@@ -62,6 +63,23 @@ exports.addVehicleService = async (req, res) => {
     if (!worker) {
       return res.status(404).json(ApiResponse({}, "Worker not found", false));
     }
+
+    let autoPartIdsParsed = [];
+    if (autoPartIds && autoPartIds.length > 0) {
+      autoPartIdsParsed = JSON.parse(autoPartIds);
+      const autoParts = await AutoPart.find({
+        _id: { $in: autoPartIdsParsed },
+        userId,
+      });
+
+      if (autoParts.length !== autoPartIdsParsed.length) {
+        return res
+          .status(404)
+          .json(ApiResponse({}, "One or more auto parts not found", false));
+      }
+    }
+
+    console.log("Parsed autoPartIds:", autoPartIdsParsed);
 
     let parsedPartDescription = [];
 
@@ -135,7 +153,7 @@ exports.addVehicleService = async (req, res) => {
       storeId,
       serviceDate: serviceDateUTC,
       workerId,
-      partRepaired,
+      autoPartIds: autoPartIdsParsed,
       description,
       partBrand,
       currentMileage,
@@ -179,7 +197,6 @@ exports.updateVehicleService = async (req, res) => {
     partBrand,
     currentMileage,
     condition,
-    partNum,
     repairPrice,
     partsCost,
     laborCost,
@@ -188,6 +205,7 @@ exports.updateVehicleService = async (req, res) => {
     warrantyTime,
     warrantyExpiration,
     comment,
+    autoPartIds,
   } = req.body;
 
   try {
@@ -240,6 +258,25 @@ exports.updateVehicleService = async (req, res) => {
       if (!worker) {
         return res.status(404).json(ApiResponse({}, "Worker not found", false));
       }
+    }
+
+    // Verify if auto parts exist (only if autoPartIds is provided)
+    if (autoPartIds) {
+      let autoPartIdsParsed = JSON.parse(autoPartIds);
+      // convert them to ObjectId
+      console.log("Parsed autoPartIds:", autoPartIdsParsed);
+      const autoParts = await AutoPart.find({
+        _id: { $in: autoPartIdsParsed },
+        userId,
+      });
+
+      if (autoParts.length !== autoPartIdsParsed.length) {
+        return res
+          .status(404)
+          .json(ApiResponse({}, "One or more auto parts not found", false));
+      }
+
+      vehicleService.autoPartIds = autoPartIdsParsed;
     }
 
     // Parse partDescription if provided

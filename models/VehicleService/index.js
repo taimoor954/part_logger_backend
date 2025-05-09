@@ -29,8 +29,9 @@ const vehicleServiceSchema = new Schema(
       ref: "Worker",
       required: true,
     },
-    partRepaired: {
-      type: String,
+    autoPartIds: {
+      type: [Schema.Types.ObjectId],
+      ref: "AutoPart",
     },
     description: {
       type: String,
