@@ -3,13 +3,8 @@ const mongoosePaginate = require("mongoose-paginate");
 const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const Schema = mongoose.Schema;
 
-const travelSchema = new Schema(
+const flightInfoSchema = new Schema(
   {
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
     from: {
       type: String,
       required: true,
@@ -24,6 +19,21 @@ const travelSchema = new Schema(
     },
     arrivalDate: {
       type: Date,
+      required: true,
+    },
+  },
+  { _id: false, timestamps: false }
+);
+
+const travelSchema = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    flightInfo: {
+      type: [flightInfoSchema],
       required: true,
     },
     flightExpense: {
@@ -43,6 +53,9 @@ const travelSchema = new Schema(
     },
     otherExpense: {
       type: Number,
+    },
+    description: {
+      type: String,
     },
     attachments: {
       type: [String],

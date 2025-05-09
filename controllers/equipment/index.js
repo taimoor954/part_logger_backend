@@ -7,7 +7,16 @@ const {
 const Equipment = require("../../models/Equipment");
 
 exports.addEquipment = async (req, res) => {
-  const { equipmentName, equipmentType, purchaseDate, price } = req.body;
+  const {
+    equipmentName,
+    equipmentType,
+    purchaseDate,
+    price,
+    warranty,
+    warrantyTime,
+    warrantyExpiration,
+  } = req.body;
+
   const userId = req.user._id;
   try {
     // Validate purchase date
@@ -39,12 +48,39 @@ exports.addEquipment = async (req, res) => {
       ? handleFileOperations([], req.files.gallery, null)
       : [];
 
+    if (warranty === "YES") {
+      if (!warrantyTime) {
+        return res
+          .status(400)
+          .json(ApiResponse({}, "Warranty time is required", false));
+      }
+      if (!warrantyExpiration) {
+        return res
+          .status(400)
+          .json(ApiResponse({}, "Warranty expiration date is required", false));
+      }
+      if (new Date(warrantyExpiration) < new Date()) {
+        return res
+          .status(400)
+          .json(
+            ApiResponse(
+              {},
+              "Warranty expiration date should be in the future",
+              false
+            )
+          );
+      }
+    }
+
     const equipment = new Equipment({
       userId,
       equipmentName,
       equipmentType,
       purchaseDate: purchaseDateUTC,
       price,
+      warranty,
+      warrantyTime,
+      warrantyExpiration,
       attachments,
     });
 
@@ -62,15 +98,22 @@ exports.addEquipment = async (req, res) => {
 };
 
 exports.updateEquipment = async (req, res) => {
-  const { equipmentName, equipmentType, purchaseDate, price, deleteImages } =
-    req.body;
+  const {
+    equipmentName,
+    equipmentType,
+    purchaseDate,
+    price,
+    deleteImages,
+    warranty,
+    warrantyTime,
+    warrantyExpiration,
+  } = req.body;
   const userId = req.user._id;
   const { type } = req?.query;
   try {
     const equipment = await Equipment.findOne({
       _id: req.params.id,
       userId,
-      equipmentType: type,
     });
 
     if (!equipment) {
@@ -104,6 +147,30 @@ exports.updateEquipment = async (req, res) => {
       }
 
       equipment.purchaseDate = purchaseDateUTC;
+    }
+
+    if (warranty != null && warranty === "YES") {
+      equipment.warranty = warranty ?? equipment.warranty;
+      equipment.warrantyTime = warrantyTime ?? equipment.warrantyTime;
+      if (warrantyExpiration) {
+        const warrantyExpirationDate = new Date(warrantyExpiration);
+        if (warrantyExpirationDate < new Date()) {
+          return res
+            .status(400)
+            .json(
+              ApiResponse(
+                {},
+                "Warranty expiration date should be in the future",
+                false
+              )
+            );
+        }
+        equipment.warrantyExpiration = warrantyExpirationDate;
+      }
+    } else if (warranty != null) {
+      equipment.warranty = warranty ?? equipment.warranty;
+      equipment.warrantyTime = null;
+      equipment.warrantyExpiration = null;
     }
 
     equipment.attachments = handleFileOperations(

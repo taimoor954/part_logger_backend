@@ -6,55 +6,89 @@ const { ApiResponse } = require("../../helpers");
 exports.addTravelExpense = async (req, res) => {
   const userId = req.user._id;
   const {
-    from,
-    to,
-    departureDate,
-    arrivalDate,
     flightExpense,
     hotelExpense,
     mealExpense,
     carRentalExpense,
+    description,
     otherExpense,
   } = req.body;
 
-  try {
-    let departureDateUTC, arrivalDateUTC;
+  let parsedFlightInfo;
 
-    // Verify the departureDate
-    if (departureDate) {
-      departureDateUTC = new Date(departureDate);
+  try {
+    // Parse flightInfo
+    try {
+      parsedFlightInfo = JSON.parse(req.body.flightInfo);
+    } catch (parseErr) {
+      return res
+        .status(400)
+        .json(
+          ApiResponse(
+            {},
+            "Invalid flightInfo format. Must be a JSON array.",
+            false
+          )
+        );
+    }
+
+    // Validate parsedFlightInfo
+    if (!Array.isArray(parsedFlightInfo) || parsedFlightInfo.length === 0) {
+      return res
+        .status(400)
+        .json(ApiResponse({}, "flightInfo must be a non-empty array", false));
+    }
+
+    const validatedFlightInfo = [];
+
+    for (let i = 0; i < parsedFlightInfo.length; i++) {
+      const { from, to, departureDate, arrivalDate } = parsedFlightInfo[i];
+
+      if (!from || !to || !departureDate || !arrivalDate) {
+        return res
+          .status(400)
+          .json(
+            ApiResponse(
+              {},
+              `Missing required fields in flightInfo at index ${i}`,
+              false
+            )
+          );
+      }
+
+      const departureDateUTC = new Date(departureDate);
+      const arrivalDateUTC = new Date(arrivalDate);
+
       if (isNaN(departureDateUTC.getTime())) {
         return res
           .status(400)
-          .json(ApiResponse({}, "Invalid departure date", false));
+          .json(ApiResponse({}, `Invalid departureDate at index ${i}`, false));
       }
-    } else {
-      return res
-        .status(400)
-        .json(ApiResponse({}, "Departure date is required", false));
-    }
 
-    // Verify the arrivalDate
-    if (arrivalDate) {
-      arrivalDateUTC = new Date(arrivalDate);
       if (isNaN(arrivalDateUTC.getTime())) {
         return res
           .status(400)
-          .json(ApiResponse({}, "Invalid arrival date", false));
+          .json(ApiResponse({}, `Invalid arrivalDate at index ${i}`, false));
       }
 
-      // Arrival date should be greater than departure date
       if (arrivalDateUTC <= departureDateUTC) {
         return res
           .status(400)
           .json(
             ApiResponse(
               {},
-              "Arrival date should be greater than departure date",
+              `arrivalDate should be after departureDate at index ${i}`,
               false
             )
           );
       }
+
+      validatedFlightInfo.push({
+        from,
+        to,
+        departureDate: departureDateUTC,
+        arrivalDate: arrivalDateUTC,
+      });
     }
 
     const attachments = req.files?.gallery
@@ -63,19 +97,16 @@ exports.addTravelExpense = async (req, res) => {
 
     const travel = new Travel({
       userId,
-      from,
-      to,
-      departureDate: departureDateUTC,
-      arrivalDate: arrivalDateUTC,
+      flightInfo: validatedFlightInfo,
       flightExpense,
       hotelExpense,
       mealExpense,
       carRentalExpense,
       otherExpense,
+      description,
       attachments,
     });
 
-    // Save travel expense record
     await travel.save();
 
     return res
@@ -92,17 +123,16 @@ exports.addTravelExpense = async (req, res) => {
 exports.updateTravelExpense = async (req, res) => {
   const userId = req.user._id;
   const {
-    departureDate,
-    arrivalDate,
-    from,
-    to,
+    flightInfo,
     flightExpense,
+    hotelExpense,
     mealExpense,
     carRentalExpense,
     otherExpense,
-    hotelExpense,
+    description,
     deletedImages,
   } = req.body;
+
   try {
     const travel = await Travel.findOne({
       _id: req.params.id,
@@ -115,48 +145,97 @@ exports.updateTravelExpense = async (req, res) => {
         .json(ApiResponse({}, "Travel expense not found", false));
     }
 
-    if (departureDate) {
-      const departureDateUTC = new Date(departureDate);
-      if (isNaN(departureDateUTC.getTime())) {
-        return res
-          .status(400)
-          .json(ApiResponse({}, "Invalid departure date", false));
-      }
-      travel.departureDate = departureDateUTC;
-    }
+    // Parse and validate flightInfo if provided
+    if (flightInfo) {
+      let parsedFlightInfo;
 
-    if (arrivalDate) {
-      const arrivalDateUTC = new Date(arrivalDate);
-      if (isNaN(arrivalDateUTC.getTime())) {
-        return res
-          .status(400)
-          .json(ApiResponse({}, "Invalid arrival date", false));
-      }
-
-      if (arrivalDateUTC <= travel.departureDate) {
+      try {
+        parsedFlightInfo = JSON.parse(flightInfo);
+      } catch (parseErr) {
         return res
           .status(400)
           .json(
             ApiResponse(
               {},
-              "Arrival date should be greater than departure date",
+              "Invalid flightInfo format. Must be a JSON array.",
               false
             )
           );
       }
 
-      travel.arrivalDate = arrivalDateUTC;
+      if (!Array.isArray(parsedFlightInfo) || parsedFlightInfo.length === 0) {
+        return res
+          .status(400)
+          .json(ApiResponse({}, "flightInfo must be a non-empty array", false));
+      }
+
+      const validatedFlightInfo = [];
+
+      for (let i = 0; i < parsedFlightInfo.length; i++) {
+        const { from, to, departureDate, arrivalDate } = parsedFlightInfo[i];
+
+        if (!from || !to || !departureDate || !arrivalDate) {
+          return res
+            .status(400)
+            .json(
+              ApiResponse(
+                {},
+                `Missing required fields in flightInfo at index ${i}`,
+                false
+              )
+            );
+        }
+
+        const departureDateUTC = new Date(departureDate);
+        const arrivalDateUTC = new Date(arrivalDate);
+
+        if (isNaN(departureDateUTC.getTime())) {
+          return res
+            .status(400)
+            .json(
+              ApiResponse({}, `Invalid departureDate at index ${i}`, false)
+            );
+        }
+
+        if (isNaN(arrivalDateUTC.getTime())) {
+          return res
+            .status(400)
+            .json(ApiResponse({}, `Invalid arrivalDate at index ${i}`, false));
+        }
+
+        if (arrivalDateUTC <= departureDateUTC) {
+          return res
+            .status(400)
+            .json(
+              ApiResponse(
+                {},
+                `arrivalDate should be after departureDate at index ${i}`,
+                false
+              )
+            );
+        }
+
+        validatedFlightInfo.push({
+          from,
+          to,
+          departureDate: departureDateUTC,
+          arrivalDate: arrivalDateUTC,
+        });
+      }
+
+      travel.flightInfo = validatedFlightInfo;
     }
 
-    travel.from = from || travel.from;
-    travel.to = to || travel.to;
-    travel.flightExpense = flightExpense || travel.flightExpense;
-    travel.hotelExpense = hotelExpense || travel.hotelExpense;
-    travel.mealExpense = mealExpense || travel.mealExpense;
-    travel.carRentalExpense = carRentalExpense || travel.carRentalExpense;
-    travel.otherExpense = otherExpense || travel.otherExpense;
+    // Update expenses if provided
+    if (flightExpense !== undefined) travel.flightExpense = flightExpense;
+    if (hotelExpense !== undefined) travel.hotelExpense = hotelExpense;
+    if (mealExpense !== undefined) travel.mealExpense = mealExpense;
+    if (carRentalExpense !== undefined)
+      travel.carRentalExpense = carRentalExpense;
+    if (otherExpense !== undefined) travel.otherExpense = otherExpense;
+    if (description !== undefined) travel.description = description;
 
-    // Handle file operations
+    // Handle attachments
     travel.attachments = handleFileOperations(
       travel.attachments,
       req.files?.gallery,
@@ -185,6 +264,7 @@ exports.getExpenses = async (req, res) => {
   try {
     let matchQuery = { userId };
 
+    // Date filter (based on createdAt)
     if (startDate) {
       const start = new Date(startDate);
       if (!isNaN(start.getTime())) {
@@ -206,10 +286,23 @@ exports.getExpenses = async (req, res) => {
       }
     }
 
+    // Keyword filter (search inside flightInfo.from or flightInfo.to)
     if (keyword) {
       matchQuery.$or = [
-        { from: { $regex: keyword, $options: "i" } },
-        { to: { $regex: keyword, $options: "i" } },
+        {
+          flightInfo: {
+            $elemMatch: {
+              from: { $regex: keyword, $options: "i" },
+            },
+          },
+        },
+        {
+          flightInfo: {
+            $elemMatch: {
+              to: { $regex: keyword, $options: "i" },
+            },
+          },
+        },
       ];
     }
 
