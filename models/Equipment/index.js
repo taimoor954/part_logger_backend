@@ -10,6 +10,11 @@ const equipmentSchema = new Schema(
       ref: "User",
       required: true,
     },
+    storeId: {
+      type: Schema.Types.ObjectId,
+      ref: "Store",
+      required: true,
+    },
     equipmentName: {
       type: String,
       required: true,
@@ -37,6 +42,9 @@ const equipmentSchema = new Schema(
     },
     warrantyExpiration: {
       type: Date,
+    },
+    description: {
+      type: String,
     },
     attachments: {
       type: [String],

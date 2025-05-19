@@ -5,6 +5,7 @@ const {
   deleteAttachments,
 } = require("../../helpers");
 const Equipment = require("../../models/Equipment");
+const Store = require("../../models/Store");
 
 exports.addEquipment = async (req, res) => {
   const {
@@ -15,10 +16,20 @@ exports.addEquipment = async (req, res) => {
     warranty,
     warrantyTime,
     warrantyExpiration,
+    description,
+    storeId,
   } = req.body;
 
   const userId = req.user._id;
   try {
+    const store = await Store.findOne({
+      _id: storeId,
+      userId,
+    });
+
+    if (!store) {
+      return res.status(404).json(ApiResponse({}, "Store not found", false));
+    }
     // Validate purchase date
     let purchaseDateUTC = null;
     if (purchaseDate) {
@@ -82,6 +93,8 @@ exports.addEquipment = async (req, res) => {
       warrantyTime,
       warrantyExpiration,
       attachments,
+      description,
+      storeId,
     });
 
     await equipment.save();
@@ -107,6 +120,8 @@ exports.updateEquipment = async (req, res) => {
     warranty,
     warrantyTime,
     warrantyExpiration,
+    description,
+    storeId,
   } = req.body;
   const userId = req.user._id;
   const { type } = req?.query;
@@ -120,6 +135,19 @@ exports.updateEquipment = async (req, res) => {
       return res
         .status(404)
         .json(ApiResponse({}, "Equipment not found", false));
+    }
+
+    if (storeId) {
+      const store = await Store.findOne({
+        _id: storeId,
+        userId,
+      });
+
+      if (!store) {
+        return res.status(404).json(ApiResponse({}, "Store not found", false));
+      }
+
+      equipment.storeId = storeId;
     }
 
     // Validate purchase date
@@ -186,6 +214,7 @@ exports.updateEquipment = async (req, res) => {
       ? equipmentType
       : equipment.equipmentType;
     equipment.price = price ? price : equipment.price;
+    equipment.description = description ? description : equipment.description;
 
     await equipment.save();
     return res.status(200).json(ApiResponse(equipment, "Equipment updated"));
@@ -203,7 +232,7 @@ exports.getEquipment = async (req, res) => {
     const equipment = await Equipment.findOne({
       _id: equipmentId,
       userId: req.user._id,
-    });
+    }).populate("storeId");
 
     if (!equipment) {
       return res
@@ -234,6 +263,19 @@ exports.getEquipments = async (req, res) => {
       $match: {
         userId,
       },
+    });
+
+    finalAggregate.push({
+      $lookup: {
+        from: "stores",
+        localField: "storeId",
+        foreignField: "_id",
+        as: "store",
+      },
+    });
+
+    finalAggregate.push({
+      $unwind: "$store",
     });
 
     if (startDate) {
