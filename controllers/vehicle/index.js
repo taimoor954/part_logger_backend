@@ -33,6 +33,7 @@ exports.addVehicle = async (req, res) => {
     notes,
     fuel,
     driveTrain,
+    warranty,
   } = req.body;
   try {
     const subscription = await Subscription.findById(
@@ -89,6 +90,7 @@ exports.addVehicle = async (req, res) => {
         VIN,
         purchaseDate: purchaseDateUTC,
         description,
+        warranty,
       },
       additionalDetails: {
         engineSize,
@@ -142,6 +144,7 @@ exports.updateVehicle = async (req, res) => {
       model: updateField(vehicle.vehicleDetails.model, req.body.model),
       year: updateField(vehicle.vehicleDetails.year, req.body.year),
       VIN: updateField(vehicle.vehicleDetails.VIN, req.body.VIN),
+      warranty: updateField(vehicle.vehicleDetails.warranty, warranty),
       purchaseDate: req.body.purchaseDate
         ? convertToUTCDate(req.body.purchaseDate)
         : vehicle.vehicleDetails.purchaseDate,

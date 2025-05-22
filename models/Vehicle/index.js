@@ -30,6 +30,10 @@ const vehicleDetailsSchema = new Schema(
       required: false,
       default: "",
     },
+    warranty: {
+      type: String,
+      enum: ["NO", "YES"],
+    },
   },
   { timestamps: true }
 );
@@ -76,7 +80,7 @@ const vehicleAdditionalDetailsSchema = new Schema(
       ],
     },
     transmissionSpeed: {
-      type: Number,
+      type: String,
     },
     driveTrain: {
       type: String,
