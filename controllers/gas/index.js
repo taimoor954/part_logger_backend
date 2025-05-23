@@ -11,7 +11,8 @@ const { deleteDraftById } = require("../draft");
 
 exports.addGasExpense = async (req, res) => {
   const userId = req.user._id;
-  const { vehicleId, gasDate, gallons, price, carMileage } = req.body;
+  const { vehicleId, gasDate, gallons, price, carMileage, description } =
+    req.body;
 
   try {
     const vehicle = await Vehicle.findOne({ _id: vehicleId, userId });
@@ -61,6 +62,7 @@ exports.addGasExpense = async (req, res) => {
       price,
       carMileage,
       attachments,
+      description,
     });
 
     await gas.save();
@@ -75,8 +77,15 @@ exports.addGasExpense = async (req, res) => {
 
 exports.updateGasExpense = async (req, res) => {
   const userId = req.user._id;
-  const { vehicleId, gasDate, gallons, price, carMileage, deletedImages } =
-    req.body;
+  const {
+    vehicleId,
+    gasDate,
+    gallons,
+    price,
+    carMileage,
+    deletedImages,
+    description,
+  } = req.body;
 
   try {
     const gas = await Gas.findOne({
@@ -126,6 +135,7 @@ exports.updateGasExpense = async (req, res) => {
     gas.gallons = gallons || gas.gallons;
     gas.price = price || gas.price;
     gas.carMileage = carMileage || gas.carMileage;
+    gas.description = description || gas.description;
 
     // Handle attachments (gallery files)
     gas.attachments = handleFileOperations(

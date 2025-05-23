@@ -34,6 +34,9 @@ const gasSchema = new Schema(
     attachments: {
       type: [String],
     },
+    description: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
