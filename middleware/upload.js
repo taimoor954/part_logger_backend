@@ -59,7 +59,11 @@ const uploadMultiple = multer({
       file.mimetype === "image/jpeg" ||
       file.mimetype === "image/jpg" ||
       file.mimetype === "image/gif" ||
-      file.mimetype === "image/webp"
+      file.mimetype === "image/webp" ||
+      file.mimetype === "application/pdf" ||
+      file.mimetype === "application/msword" || // .doc
+      file.mimetype ===
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" // .docx
     ) {
       cb(null, true);
     } else if (!file) {
@@ -72,7 +76,7 @@ const uploadMultiple = multer({
 });
 exports.uploadMultiple = uploadMultiple.fields([
   { name: "image", maxCount: 1 },
-    { name: "gallery", maxCount: 10 },
+  { name: "gallery", maxCount: 10 },
   //   { name: "licenseFront", maxCount: 1 },
   //   { name: "licenseBack", maxCount: 1 },
 ]);

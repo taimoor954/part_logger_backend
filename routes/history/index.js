@@ -8,6 +8,7 @@ const {
   checkUpdateRecord,
 } = require("../../middleware/history");
 const { uploadMultiple } = require("../../middleware/upload");
+const { getExpenses } = require("../../controllers/expense");
 
 const router = express.Router();
 
@@ -32,5 +33,7 @@ router.put(
   uploadMultiple,
   checkUpdateRecord
 );
+
+router.get("/getExpenses", userRoute, checkSubscription, getExpenses);
 
 module.exports = router;

@@ -21,7 +21,7 @@ router.post(
   uploadMultiple,
   addRecord
 );
-router.get("/getRecords/:categoryId", userRoute, checkSubscription, getRecords);
+router.get("/getRecords", userRoute, checkSubscription, getRecords);
 router.get("/getRecord/:recordId", userRoute, checkSubscription, getRecord);
 router.put(
   "/updateRecord/:recordId",
@@ -30,6 +30,11 @@ router.put(
   uploadMultiple,
   updateRecord
 );
-router.delete("/deleteRecord/:recordId", userRoute, checkSubscription, deleteRecord);
+router.delete(
+  "/deleteRecord/:recordId",
+  userRoute,
+  checkSubscription,
+  deleteRecord
+);
 
 module.exports = router;

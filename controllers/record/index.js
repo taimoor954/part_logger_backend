@@ -329,7 +329,7 @@ exports.getRecord = async (req, res) => {
 exports.getRecords = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
-  const { categoryId } = req.params;
+  const { categoryId } = req.query;
   const userId = req.user._id;
   try {
     let finalAggregate = [];

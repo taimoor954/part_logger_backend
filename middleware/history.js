@@ -24,6 +24,7 @@ const {
   updateMaintenance,
 } = require("../controllers/maintenance");
 const { getPets, deletePet, updatePet } = require("../controllers/pet");
+const { getRecords } = require("../controllers/record");
 const {
   getRepairsByUser,
   deleteRepair,
@@ -103,6 +104,9 @@ exports.checkOtherRecordType = async (req, res, next) => {
         break;
       case "VET":
         await getVets(req, res);
+        break;
+      case "CUSTOM":
+        await getRecords(req, res);
         break;
       case "HEAVY":
       case "HOME":
