@@ -37,6 +37,10 @@ const categorySchema = new Schema(
       type: Boolean,
       required: true,
     },
+    gallery: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

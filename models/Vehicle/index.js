@@ -48,11 +48,11 @@ const vehicleAdditionalDetailsSchema = new Schema(
     },
     turboCharger: {
       type: Boolean,
-      enum: ["NO", "SUPERCHARGER", "TURBO_CHARGER"],
+      // enum: ["NO", "SUPERCHARGER", "TURBO_CHARGER", "OTHER"],
     },
     fuel: {
       type: String,
-      enum: ["GAS", "DIESEL", "ELECTRIC", "HYBRID", "PROPANE"],
+      // enum: ["GAS", "DIESEL", "ELECTRIC", "HYBRID", "PROPANE", "OTHER"],
     },
     engineOilType: {
       type: String,
@@ -68,23 +68,23 @@ const vehicleAdditionalDetailsSchema = new Schema(
     },
     transmissionType: {
       type: String,
-      enum: [
-        "MANUAL",
-        "AUTOMATIC",
-        "SEMI_AUTOMATIC",
-        "CVT",
-        "HYBRID",
-        "ELECTRIC_DRIVE",
-        "HYDROSTATIC",
-        "OTHER",
-      ],
+      // enum: [
+      //   "MANUAL",
+      //   "AUTOMATIC",
+      //   "SEMI_AUTOMATIC",
+      //   "CVT",
+      //   "HYBRID",
+      //   "ELECTRIC_DRIVE",
+      //   "HYDROSTATIC",
+      //   "OTHER",
+      // ],
     },
     transmissionSpeed: {
       type: String,
     },
     driveTrain: {
       type: String,
-      enum: ["2WD", "4WD", "AWD"],
+      // enum: ["2WD", "4WD", "AWD", "OTHER"],
     },
     tireSize: {
       type: Number,

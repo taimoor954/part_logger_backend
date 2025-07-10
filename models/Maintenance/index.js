@@ -15,6 +15,14 @@ const maintenanceSchema = new Schema(
       ref: "Vehicle",
       default: null,
     },
+    location: {
+      type: String,
+      default: "",
+    },
+    description: {
+      type: String,
+      default: "",
+    },
     storeId: {
       type: Schema.Types.ObjectId,
       ref: "Store",
