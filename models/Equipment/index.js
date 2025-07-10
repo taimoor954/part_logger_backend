@@ -13,41 +13,46 @@ const equipmentSchema = new Schema(
     storeId: {
       type: Schema.Types.ObjectId,
       ref: "Store",
-      required: true,
+      default: null,
     },
     equipmentName: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     equipmentType: {
       type: String,
-      required: true,
       enum: ["HOME", "HEAVY", "SMALL", "TOOL"],
+      default: "HOME",
     },
     purchaseDate: {
       type: Date,
-      required: true,
+      default: null,
     },
     price: {
       type: Number,
-      required: true,
+      default: 0,
     },
     warranty: {
       type: String,
       enum: ["YES", "NO", "NOT_APPLICABLE"],
+      default: "NO",
     },
     warrantyTime: {
       type: String,
+      default: "",
     },
     warrantyExpiration: {
       type: Date,
+      default: null,
     },
     description: {
       type: String,
+      default: "",
     },
     attachments: {
       type: [String],
+      default: [],
     },
   },
   { timestamps: true }

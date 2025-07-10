@@ -13,77 +13,92 @@ const vehicleServiceSchema = new Schema(
     vehicleId: {
       type: Schema.Types.ObjectId,
       ref: "Vehicle",
-      required: true,
+      default: null,
     },
     storeId: {
       type: Schema.Types.ObjectId,
       ref: "Store",
-      required: true,
+      default: null,
     },
     serviceDate: {
       type: Date,
-      required: true,
+      default: null,
     },
     workerId: {
       type: Schema.Types.ObjectId,
       ref: "Worker",
-      required: true,
+      default: null,
     },
     autoPartIds: {
       type: [Schema.Types.ObjectId],
       ref: "AutoPart",
+      default: [],
     },
     description: {
       type: String,
+      default: "",
     },
     partBrand: {
       type: String,
+      default: "",
     },
     currentMileage: {
       type: Number,
+      default: 0,
     },
     condition: {
       type: String,
       enum: ["NEW", "USED"],
+      default: "NEW",
     },
     partDescription: [
       {
         partNum: {
           type: String,
+          default: "",
         },
-
         partDesc: {
           type: String,
+          default: "",
         },
       },
     ],
     repairPrice: {
       type: Number,
+      default: 0,
     },
     partsCost: {
       type: Number,
+      default: 0,
     },
     laborCost: {
       type: Number,
+      default: 0,
     },
     warranty: {
       type: String,
       enum: ["YES", "NO", "NOT_APPLICABLE"],
+      default: "NO",
     },
     warrantyTime: {
       type: String,
+      default: "",
     },
     warrantyExpiration: {
       type: Date,
+      default: null,
     },
     warrantyPrice: {
       type: Number,
+      default: 0,
     },
     comment: {
       type: String,
+      default: "",
     },
     attachments: {
       type: [String],
+      default: [],
     },
   },
   { timestamps: true }

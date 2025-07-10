@@ -13,14 +13,16 @@ const draftSchema = new Schema(
     vehicleId: {
       type: Schema.Types.ObjectId,
       ref: "Vehicle",
-      required: true,
+      default: null,
     },
     title: {
       type: String,
       trim: true,
+      default: "",
     },
     attachments: {
       type: [String],
+      default: [],
     },
   },
   { timestamps: true }

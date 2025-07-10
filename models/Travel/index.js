@@ -7,19 +7,19 @@ const flightInfoSchema = new Schema(
   {
     from: {
       type: String,
-      required: true,
+      default: "",
     },
     to: {
       type: String,
-      required: true,
+      default: "",
     },
     departureDate: {
       type: Date,
-      required: true,
+      default: null,
     },
     arrivalDate: {
       type: Date,
-      required: true,
+      default: null,
     },
   },
   { _id: false, timestamps: false }
@@ -34,31 +34,35 @@ const travelSchema = new Schema(
     },
     flightInfo: {
       type: [flightInfoSchema],
-      required: true,
+      default: [],
     },
     flightExpense: {
       type: Number,
-      required: true,
+      default: 0,
     },
     hotelExpense: {
       type: Number,
-      required: true,
+      default: 0,
     },
     mealExpense: {
       type: Number,
-      required: true,
+      default: 0,
     },
     carRentalExpense: {
       type: Number,
+      default: 0,
     },
     otherExpense: {
       type: Number,
+      default: 0,
     },
     description: {
       type: String,
+      default: "",
     },
     attachments: {
       type: [String],
+      default: [],
     },
   },
   { timestamps: true }

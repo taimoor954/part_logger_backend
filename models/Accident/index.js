@@ -13,29 +13,31 @@ const accidentSchema = new Schema(
     vehicleId: {
       type: Schema.Types.ObjectId,
       ref: "Vehicle",
-      required: true,
+      default: null,
     },
     accidentDate: {
       type: Date,
-      required: true,
+      default: null,
     },
     location: {
       type: String,
-      required: true,
+      default: "",
     },
     involvedDriverName: {
       type: String,
-      required: true,
+      default: "",
     },
     involvedDriverPhone: {
       type: String,
-      required: true,
+      default: "",
     },
     description: {
       type: String,
+      default: "",
     },
     attachments: {
       type: [String],
+      default: [],
     },
   },
   { timestamps: true }

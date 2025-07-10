@@ -13,29 +13,31 @@ const gasSchema = new Schema(
     vehicleId: {
       type: Schema.Types.ObjectId,
       ref: "Vehicle",
-      required: true,
+      default: null,
     },
     gasDate: {
       type: Date,
-      required: true,
+      default: null,
     },
     gallons: {
       type: Number,
-      required: true,
+      default: 0,
     },
     price: {
       type: Number,
-      required: true,
+      default: 0,
     },
     carMileage: {
       type: Number,
-      required: true,
+      default: 0,
     },
     attachments: {
       type: [String],
+      default: [],
     },
     description: {
       type: String,
+      default: "",
     },
   },
   { timestamps: true }

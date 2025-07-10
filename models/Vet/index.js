@@ -13,24 +13,27 @@ const vetSchema = new Schema(
     petId: {
       type: Schema.Types.ObjectId,
       ref: "Pet",
-      required: true,
+      default: null,
     },
     checkupDate: {
       type: Date,
-      required: true,
+      default: null,
     },
     payment: {
       type: Number,
-      required: true,
+      default: 0,
     },
     otherExpense: {
       type: Number,
+      default: 0,
     },
     details: {
       type: String,
+      default: "",
     },
     attachments: {
       type: [String],
+      default: [],
     },
   },
   { timestamps: true }

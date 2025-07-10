@@ -6,40 +6,47 @@ const Schema = mongoose.Schema;
 const partDetailsSchema = new Schema({
   partName: {
     type: String,
-    required: true,
+    default: "",
   },
   brand: {
     type: String,
-    required: true,
+    default: "",
   },
   price: {
     type: Number,
-    required: true,
+    default: 0,
   },
   currentCarMileage: {
     type: Number,
-    required: true,
+    default: 0,
   },
   condition: {
     type: String,
+    default: "",
   },
   partNumber: {
     type: String,
+    default: "",
   },
   warrantyManufacture: {
     type: Number, // in months
+    default: 0,
   },
   extendedWarranty: {
     type: Number, // in years
+    default: 0,
   },
   extendedWarrantyPrice: {
     type: Number,
+    default: 0,
   },
   receiptNum: {
     type: String,
+    default: "",
   },
   attachments: {
     type: [String],
+    default: [],
   },
 });
 
@@ -53,24 +60,24 @@ const autoPartSchema = new Schema(
     vehicleId: {
       type: Schema.Types.ObjectId,
       ref: "Vehicle",
-      required: true,
+      default: null,
     },
     storeId: {
       type: Schema.Types.ObjectId,
       ref: "Store",
-      required: true,
+      default: null,
     },
     sellerId: {
       type: Schema.Types.ObjectId,
-      required: true,
+      default: null,
     },
     buyingDate: {
       type: Date,
-      required: true,
+      default: null,
     },
     partDetails: {
       type: partDetailsSchema,
-      required: true,
+      default: {},
     },
   },
   {

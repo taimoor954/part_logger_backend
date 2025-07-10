@@ -130,7 +130,6 @@ const vehicleSchema = new Schema(
     },
     gallery: {
       type: [String],
-      required: true,
     },
   },
   { timestamps: true }

@@ -13,52 +13,54 @@ const maintenanceSchema = new Schema(
     vehicleId: {
       type: Schema.Types.ObjectId,
       ref: "Vehicle",
-      required: true,
+      default: null,
     },
     storeId: {
       type: Schema.Types.ObjectId,
       ref: "Store",
-      required: true,
+      default: null,
     },
     mechanicId: {
       type: Schema.Types.ObjectId,
       ref: "Worker",
-      required: true,
+      default: null,
     },
     autoPartIds: {
       type: [Schema.Types.ObjectId],
       ref: "AutoPart",
+      default: [],
     },
     maintenanceDate: {
       type: Date,
-      required: true,
+      default: null,
     },
     details: {
       type: [String],
-      required: true,
+      default: [],
     },
     carMileage: {
       type: Number,
-      required: true,
+      default: 0,
     },
     estimatedCost: {
       type: Number,
-      required: true,
+      default: 0,
     },
     laborCost: {
       type: Number,
-      required: true,
+      default: 0,
     },
     partsCost: {
       type: Number,
-      required: true,
+      default: 0,
     },
     totalPrice: {
       type: Number,
-      required: true,
+      default: 0,
     },
     attachments: {
       type: [String],
+      default: [],
     },
   },
   { timestamps: true }

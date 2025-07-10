@@ -12,19 +12,19 @@ const petSchema = new Schema(
     },
     specie: {
       type: String,
-      required: true,
+      default: "",
     },
     breed: {
       type: String,
-      required: true,
+      default: "",
     },
     dateOfBirth: {
       type: Date,
-      required: true,
+      default: null,
     },
     purchaseDate: {
       type: Date,
-      required: true,
+      default: null,
     },
     description: {
       type: String,
@@ -32,19 +32,23 @@ const petSchema = new Schema(
     },
     name: {
       type: String,
-      required: true,
+      default: "",
     },
     veterinarianName: {
       type: String,
+      default: "",
     },
     veterinarianPhone: {
       type: String,
+      default: "",
     },
     price: {
       type: Number,
+      default: 0,
     },
     attachments: {
       type: [String],
+      default: [],
     },
   },
   { timestamps: true }

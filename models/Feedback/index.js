@@ -12,23 +12,23 @@ const feedbackSchema = new Schema(
     },
     name: {
       type: String,
-      required: true,
+      default: "",
     },
     email: {
       type: String,
-      required: true,
+      default: "",
     },
     phone: {
       type: String,
-      required: true,
+      default: "",
     },
     subject: {
       type: String,
-      required: true,
+      default: "",
     },
     message: {
       type: String,
-      required: true,
+      default: "",
     },
   },
   { timestamps: true }

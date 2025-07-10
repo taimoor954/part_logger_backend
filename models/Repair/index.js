@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 const indivdualRepairSchema = new Schema({
   name: {
     type: String,
-    required: true,
+    default: "",
   },
 });
 
@@ -14,7 +14,7 @@ const repairPartDetailsSchema = new Schema(
   {
     repairs: {
       type: [indivdualRepairSchema],
-      required: true,
+      default: [],
     },
     autoParts: {
       type: [Schema.Types.ObjectId],
@@ -23,26 +23,27 @@ const repairPartDetailsSchema = new Schema(
     },
     currentCarMileage: {
       type: Number,
-      required: true,
+      default: 0,
     },
     estimatedRepairCost: {
       type: Number,
-      required: true,
+      default: 0,
     },
     laborCost: {
       type: Number,
-      required: true,
+      default: 0,
     },
     repairPartsCost: {
       type: Number,
-      required: true,
+      default: 0,
     },
     totalRepairCost: {
       type: Number,
-      required: true,
+      default: 0,
     },
     attachments: {
       type: [String],
+      default: [],
     },
   },
   { timestamps: true }
@@ -58,24 +59,24 @@ const repairSchema = new Schema(
     vehicleId: {
       type: Schema.Types.ObjectId,
       ref: "Vehicle",
-      required: true,
+      default: null,
     },
     storeId: {
       type: Schema.Types.ObjectId,
       ref: "Store",
-      required: true,
+      default: null,
     },
     mechanicId: {
       type: Schema.Types.ObjectId,
-      required: true,
+      default: null,
     },
     repairDate: {
       type: Date,
-      required: true,
+      default: null,
     },
     repairPartDetails: {
       type: repairPartDetailsSchema,
-      required: true,
+      default: {},
     },
   },
   { timestamps: true }
