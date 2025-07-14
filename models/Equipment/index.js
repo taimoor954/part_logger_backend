@@ -35,7 +35,7 @@ const equipmentSchema = new Schema(
     },
     warranty: {
       type: String,
-      enum: ["YES", "NO", "NOT_APPLICABLE"],
+      enum: ["YES", "NO"],
       default: "NO",
     },
     warrantyTime: {

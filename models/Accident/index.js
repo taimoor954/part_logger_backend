@@ -3,6 +3,32 @@ const mongoosePaginate = require("mongoose-paginate");
 const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const Schema = mongoose.Schema;
 
+const otherCarDetailsSchema = new Schema(
+  {
+    hasInsurance: {
+      type: Boolean,
+      default: false,
+    },
+    licensePlate: {
+      type: String,
+      default: "",
+    },
+    make: {
+      type: String,
+      default: "",
+    },
+    model: {
+      type: String,
+      default: "",
+    },
+    color: {
+      type: String,
+      default: "",
+    },
+  },
+  { timestamps: false, _id: false }
+);
+
 const accidentSchema = new Schema(
   {
     userId: {
@@ -30,6 +56,10 @@ const accidentSchema = new Schema(
     involvedDriverPhone: {
       type: String,
       default: "",
+    },
+    involvedCarDetails: {
+      type: otherCarDetailsSchema,
+      default: {},
     },
     description: {
       type: String,

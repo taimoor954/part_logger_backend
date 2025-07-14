@@ -19,6 +19,9 @@ exports.addMaintenance = async (req, res) => {
     vehicleId,
     storeId,
     mechanicId,
+    location,
+    description,
+    comments,
     maintenanceDate,
     details,
     carMileage,
@@ -31,14 +34,14 @@ exports.addMaintenance = async (req, res) => {
 
   try {
     // Validate Object IDs
-    if (
-      !mongoose.isValidObjectId(vehicleId) ||
-      !mongoose.isValidObjectId(storeId)
-    ) {
-      return res
-        .status(400)
-        .json(ApiResponse({}, "Invalid vehicle or store ID", false));
-    }
+    // if (
+    //   !mongoose.isValidObjectId(vehicleId) ||
+    //   !mongoose.isValidObjectId(storeId)
+    // ) {
+    //   return res
+    //     .status(400)
+    //     .json(ApiResponse({}, "Invalid vehicle or store ID", false));
+    // }
 
     // Verify if the vehicle exists
     const vehicle = await Vehicle.findOne({ _id: vehicleId, userId });
@@ -47,20 +50,20 @@ exports.addMaintenance = async (req, res) => {
     }
 
     // Verify if the store exists
-    const store = await Store.findOne({ _id: storeId, userId });
-    if (!store) {
-      return res.status(404).json(ApiResponse({}, "Store not found", false));
-    }
+    // const store = await Store.findOne({ _id: storeId, userId });
+    // if (!store) {
+    //   return res.status(404).json(ApiResponse({}, "Store not found", false));
+    // }
 
-    const mechanicExists = store.mechanics.some(
-      (id) => id.toString() === mechanicId
-    );
+    // const mechanicExists = store.mechanics.some(
+    //   (id) => id.toString() === mechanicId
+    // );
 
-    if (!mechanicExists) {
-      return res
-        .status(404)
-        .json(ApiResponse({}, "Mechanic not found in this store", false));
-    }
+    // if (!mechanicExists) {
+    //   return res
+    //     .status(404)
+    //     .json(ApiResponse({}, "Mechanic not found in this store", false));
+    // }
 
     let autoPartIdsParsed = [];
     if (autoPartIds && autoPartIds.length > 0) {
@@ -121,8 +124,11 @@ exports.addMaintenance = async (req, res) => {
     const maintenance = new Maintenance({
       userId,
       vehicleId,
-      mechanicId,
-      storeId,
+      // mechanicId,
+      // storeId,
+      location,
+      description,
+      comments,
       maintenanceDate: maintenanceDateUTC,
       details: detailsParsed,
       carMileage,
@@ -151,8 +157,8 @@ exports.updateMaintenance = async (req, res) => {
   const maintenanceId = req.params.id;
   const {
     vehicleId,
-    storeId,
-    mechanicId,
+    // storeId,
+    // mechanicId,
     maintenanceDate,
     details,
     carMileage,
@@ -162,21 +168,24 @@ exports.updateMaintenance = async (req, res) => {
     totalPrice,
     deletedImages,
     autoPartIds,
+    description,
+    location,
+    comments,
   } = req.body;
 
   try {
     // Validate Object IDs
-    if (
-      (vehicleId && !mongoose.isValidObjectId(vehicleId)) ||
-      (storeId && !mongoose.isValidObjectId(storeId)) ||
-      !mongoose.isValidObjectId(maintenanceId)
-    ) {
-      return res
-        .status(400)
-        .json(
-          ApiResponse({}, "Invalid vehicle, store or maintenance ID", false)
-        );
-    }
+    // if (
+    //   (vehicleId && !mongoose.isValidObjectId(vehicleId)) ||
+    //   (storeId && !mongoose.isValidObjectId(storeId)) ||
+    //   !mongoose.isValidObjectId(maintenanceId)
+    // ) {
+    //   return res
+    //     .status(400)
+    //     .json(
+    //       ApiResponse({}, "Invalid vehicle, store or maintenance ID", false)
+    //     );
+    // }
 
     // Fetch the maintenance record before doing any updates
     const maintenance = await Maintenance.findOne({ _id: maintenanceId });
@@ -198,27 +207,27 @@ exports.updateMaintenance = async (req, res) => {
     }
 
     // Verify if the store exists (only if storeId is provided)
-    if (storeId) {
-      const store = await Store.findOne({ _id: storeId, userId });
-      if (!store) {
-        return res.status(404).json(ApiResponse({}, "Store not found", false));
-      }
-      maintenance.storeId = storeId;
-    }
+    // if (storeId) {
+    //   const store = await Store.findOne({ _id: storeId, userId });
+    //   if (!store) {
+    //     return res.status(404).json(ApiResponse({}, "Store not found", false));
+    //   }
+    //   maintenance.storeId = storeId;
+    // }
 
     // Verify if mechanic exists in the store (only if mechanicId is provided)
-    if (mechanicId) {
-      const store = await Store.findById(maintenance.storeId); // Get store from maintenance if already set
-      const mechanicExists = store.mechanics.some(
-        (id) => id.toString() === mechanicId
-      );
-      if (!mechanicExists) {
-        return res
-          .status(404)
-          .json(ApiResponse({}, "Mechanic not found in this store", false));
-      }
-      maintenance.mechanicId = mechanicId;
-    }
+    // if (mechanicId) {
+    //   const store = await Store.findById(maintenance.storeId); // Get store from maintenance if already set
+    //   const mechanicExists = store.mechanics.some(
+    //     (id) => id.toString() === mechanicId
+    //   );
+    //   if (!mechanicExists) {
+    //     return res
+    //       .status(404)
+    //       .json(ApiResponse({}, "Mechanic not found in this store", false));
+    //   }
+    //   maintenance.mechanicId = mechanicId;
+    // }
 
     // Verify if auto parts exist (only if autoPartIds is provided)
     if (autoPartIds) {
@@ -282,6 +291,9 @@ exports.updateMaintenance = async (req, res) => {
     maintenance.laborCost = laborCost || maintenance.laborCost;
     maintenance.partsCost = partsCost || maintenance.partsCost;
     maintenance.totalPrice = totalPrice || maintenance.totalPrice;
+    maintenance.description = description || maintenance.description;
+    maintenance.location = location || maintenance.location;
+    maintenance.comments = comments || maintenance.comments;
 
     // Save the updated maintenance record
     await maintenance.save();

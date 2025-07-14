@@ -23,11 +23,11 @@ const maintenanceSchema = new Schema(
       type: String,
       default: "",
     },
-    storeId: {
-      type: Schema.Types.ObjectId,
-      ref: "Store",
-      default: null,
-    },
+    // storeId: {
+    //   type: Schema.Types.ObjectId,
+    //   ref: "Store",
+    //   default: null,
+    // },
     mechanicId: {
       type: Schema.Types.ObjectId,
       ref: "Worker",
@@ -65,6 +65,10 @@ const maintenanceSchema = new Schema(
     totalPrice: {
       type: Number,
       default: 0,
+    },
+    comments: {
+      type: String,
+      default: "",
     },
     attachments: {
       type: [String],

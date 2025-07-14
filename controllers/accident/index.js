@@ -11,13 +11,14 @@ const { deleteDraftById } = require("../draft");
 
 exports.addAccident = async (req, res) => {
   const userId = req.user._id;
-  const {
+  let {
     vehicleId,
     accidentDate,
     location,
     involvedDriverName,
     involvedDriverPhone,
     description,
+    involvedCarDetails,
   } = req.body;
 
   try {
@@ -62,6 +63,17 @@ exports.addAccident = async (req, res) => {
       req.query?.deletedImages
     );
 
+    // parse involvedCarDetails if provided
+    if (involvedCarDetails) {
+      try {
+        involvedCarDetails = JSON.parse(involvedCarDetails);
+      } catch (error) {
+        return res
+          .status(400)
+          .json(ApiResponse({}, "Invalid involved car details format", false));
+      }
+    }
+
     // Create the accident record
     const accident = new Accident({
       userId,
@@ -72,6 +84,7 @@ exports.addAccident = async (req, res) => {
       involvedDriverPhone,
       description,
       attachments,
+      involvedCarDetails: involvedCarDetails || {},
     });
 
     await accident.save();
@@ -86,7 +99,7 @@ exports.addAccident = async (req, res) => {
 
 exports.updateAccident = async (req, res) => {
   const userId = req.user._id;
-  const {
+  let {
     vehicleId,
     accidentDate,
     location,
@@ -94,6 +107,7 @@ exports.updateAccident = async (req, res) => {
     involvedDriverPhone,
     description,
     deletedImages,
+    involvedCarDetails,
   } = req.body;
 
   try {
@@ -160,6 +174,18 @@ exports.updateAccident = async (req, res) => {
     accident.involvedDriverPhone =
       involvedDriverPhone ?? accident.involvedDriverPhone;
     accident.description = description ?? accident.description;
+
+    // Parse and update involvedCarDetails if provided
+    if (involvedCarDetails) {
+      try {
+        const parsedCarDetails = JSON.parse(involvedCarDetails);
+        accident.involvedCarDetails = parsedCarDetails;
+      } catch (error) {
+        return res
+          .status(400)
+          .json(ApiResponse({}, "Invalid involved car details format", false));
+      }
+    }
 
     // Handle file operations
     accident.attachments = handleFileOperations(

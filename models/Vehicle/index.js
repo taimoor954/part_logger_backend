@@ -7,15 +7,15 @@ const vehicleDetailsSchema = new Schema(
   {
     make: {
       type: String,
-      required: true,
+      default: "",
     },
     model: {
       type: String,
-      required: true,
+      default: "",
     },
     year: {
       type: Number,
-      required: true,
+      default: "",
     },
     VIN: {
       type: String,
@@ -87,13 +87,14 @@ const vehicleAdditionalDetailsSchema = new Schema(
       // enum: ["2WD", "4WD", "AWD", "OTHER"],
     },
     tireSize: {
-      type: Number,
+      type: String,
     },
     tirePressure: {
-      type: Number,
+      type: String,
     },
     carMilage: {
-      type: Number,
+      type: String,
+      default: "",
     },
     notes: {
       type: String,
