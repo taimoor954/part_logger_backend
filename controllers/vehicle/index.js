@@ -124,7 +124,6 @@ exports.addVehicle = async (req, res) => {
 
 exports.updateVehicle = async (req, res) => {
   try {
-    // Find the vehicle by ID and user
     const vehicle = await Vehicle.findOne({
       _id: req.params.id,
       userId: req.user._id,
@@ -134,89 +133,66 @@ exports.updateVehicle = async (req, res) => {
       return res.status(404).json(ApiResponse({}, "Vehicle not found", false));
     }
 
-    // Update vehicle fields if provided
-    const updateField = (currentValue, newValue) =>
-      newValue !== undefined ? newValue : currentValue;
-
-    vehicle.vehicleDetails = {
-      ...vehicle.vehicleDetails,
-      make: updateField(vehicle.vehicleDetails.make, req.body.make),
-      model: updateField(vehicle.vehicleDetails.model, req.body.model),
-      year: updateField(vehicle.vehicleDetails.year, req.body.year),
-      VIN: updateField(vehicle.vehicleDetails.VIN, req.body.VIN),
-      warranty: updateField(vehicle.vehicleDetails.warranty, warranty),
-      purchaseDate: req.body.purchaseDate
-        ? convertToUTCDate(req.body.purchaseDate)
-        : vehicle.vehicleDetails.purchaseDate,
-      description: updateField(
-        vehicle.vehicleDetails.description,
-        req.body.description
-      ),
+    const updateField = (obj, data) => {
+      for (let key in data) {
+        if (data[key] !== undefined) {
+          if (key === "purchaseDate") {
+            obj[key] = convertToUTCDate(data[key]);
+          } else {
+            obj[key] = data[key];
+          }
+        }
+      }
     };
 
-    vehicle.additionalDetails = {
-      ...vehicle.additionalDetails,
-      engineSize: updateField(
-        vehicle.additionalDetails.engineSize,
-        req.body.engineSize
-      ),
-      cylinders: updateField(
-        vehicle.additionalDetails.cylinders,
-        req.body.cylinders
-      ),
-      turboCharger: updateField(
-        vehicle.additionalDetails.turboCharger,
-        req.body.turboCharger
-      ),
-      engineOilType: updateField(
-        vehicle.additionalDetails.engineOilType,
-        req.body.engineOilType
-      ),
-      engineCoolantType: updateField(
-        vehicle.additionalDetails.engineCoolantType,
-        req.body.engineCoolantType
-      ),
-      transmissionFluidType: updateField(
-        vehicle.additionalDetails.transmissionFluidType,
-        req.body.transmissionFluidType
-      ),
-      transmissionSpeed: updateField(
-        vehicle.additionalDetails.transmissionSpeed,
-        req.body.transmissionSpeed
-      ),
-      tireSize: updateField(
-        vehicle.additionalDetails.tireSize,
-        req.body.tireSize
-      ),
-      tirePressure: updateField(
-        vehicle.additionalDetails.tirePressure,
-        req.body.tirePressure
-      ),
-      transmissionType: updateField(
-        vehicle.additionalDetails.transmissionType,
-        req.body.transmissionType
-      ),
-      carMilage: updateField(
-        vehicle.additionalDetails.carMilage,
-        req.body.carMilage
-      ),
-      notes: updateField(vehicle.additionalDetails.notes, req.body.notes),
-      fuel: updateField(vehicle.additionalDetails.fuel, req.body.fuel),
-      driveTrain: updateField(
-        vehicle.additionalDetails.driveTrain,
-        req.body.driveTrain
-      ),
-    };
+    // Only update if req.body has vehicleDetails
+    if (
+      req.body.make ||
+      req.body.model ||
+      req.body.year ||
+      req.body.VIN ||
+      req.body.purchaseDate ||
+      req.body.description ||
+      req.body.warranty !== undefined
+    ) {
+      updateField(vehicle.vehicleDetails, {
+        make: req.body.make,
+        model: req.body.model,
+        year: req.body.year,
+        VIN: req.body.VIN,
+        warranty: req.body.warranty,
+        purchaseDate: req.body.purchaseDate,
+        description: req.body.description,
+      });
+    }
 
-    // Handle gallery updates (add or delete images)
+    // Same for additionalDetails
+    updateField(vehicle.additionalDetails, {
+      engineSize: req.body.engineSize,
+      cylinders: req.body.cylinders,
+      turboCharger: req.body.turboCharger,
+      engineOilType: req.body.engineOilType,
+      engineCoolantType: req.body.engineCoolantType,
+      transmissionFluidType: req.body.transmissionFluidType,
+      transmissionSpeed: req.body.transmissionSpeed,
+      tireSize: req.body.tireSize,
+      tirePressure: req.body.tirePressure,
+      transmissionType: req.body.transmissionType,
+      carMilage: req.body.carMilage,
+      notes: req.body.notes,
+      fuel: req.body.fuel,
+      driveTrain: req.body.driveTrain,
+    });
+
+    // Handle gallery updates
     vehicle.gallery = handleFileOperations(
       vehicle.gallery,
       req.files?.gallery,
       req.body.deletedImages
     );
 
-    // Save changes
     await vehicle.save();
+
     return res
       .status(200)
       .json(ApiResponse(vehicle, "Vehicle updated successfully", true));
