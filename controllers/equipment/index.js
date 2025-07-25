@@ -34,10 +34,7 @@ exports.addEquipment = async (req, res) => {
       if (!store) {
         return res.status(404).json(ApiResponse({}, "Store not found", false));
       }
-    } else if (storeId && !isValidObjectId) {
-      return res.status(400).json(ApiResponse({}, "Invalid store ID", false));
     }
-
     // Validate purchase date
     let purchaseDateUTC = null;
     if (purchaseDate) {
