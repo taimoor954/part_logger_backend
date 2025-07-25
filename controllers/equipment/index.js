@@ -6,6 +6,7 @@ const {
 } = require("../../helpers");
 const Equipment = require("../../models/Equipment");
 const Store = require("../../models/Store");
+const mongoose = require("mongoose");
 
 exports.addEquipment = async (req, res) => {
   const {
