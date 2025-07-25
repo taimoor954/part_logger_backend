@@ -258,6 +258,7 @@ exports.getEquipments = async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
   const userId = req.user._id;
   let { startDate, endDate, type, keyword } = req.query;
+  console.log("Query parameters:", req.query);
 
   try {
     let finalAggregate = [];
@@ -279,7 +280,10 @@ exports.getEquipments = async (req, res) => {
     });
 
     finalAggregate.push({
-      $unwind: "$store",
+      $unwind: {
+        path: "$store",
+        preserveNullAndEmptyArrays: true, // <-- prevents error when storeId is null
+      },
     });
 
     if (startDate) {
@@ -294,6 +298,7 @@ exports.getEquipments = async (req, res) => {
 
     if (type) {
       type = type.toUpperCase();
+      console.log("Equipment type:", type);
       finalAggregate.push({ $match: { equipmentType: type } });
     }
 
