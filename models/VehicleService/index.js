@@ -20,6 +20,10 @@ const vehicleServiceSchema = new Schema(
       ref: "Store",
       default: null,
     },
+    location: {
+      type: String,
+      default: "",
+    },
     serviceDate: {
       type: Date,
       default: null,
@@ -72,6 +76,18 @@ const vehicleServiceSchema = new Schema(
       default: 0,
     },
     laborCost: {
+      type: Number,
+      default: 0,
+    },
+    estimatedMaintenancePrice: {
+      type: Number,
+      default: 0,
+    },
+    actualMaintenancePrice: {
+      type: Number,
+      default: 0,
+    },
+    totalMaintenanceCost: {
       type: Number,
       default: 0,
     },

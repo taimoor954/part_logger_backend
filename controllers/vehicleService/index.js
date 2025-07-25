@@ -17,7 +17,8 @@ exports.addVehicleService = async (req, res) => {
   const userId = req.user._id;
   const {
     vehicleId,
-    storeId,
+    // storeId,
+    location,
     serviceDate,
     workerId,
     autoPartIds,
@@ -29,6 +30,9 @@ exports.addVehicleService = async (req, res) => {
     repairPrice,
     partsCost,
     laborCost,
+    estimatedMaintenancePrice,
+    actualMaintenancePrice,
+    totalMaintenanceCost,
     warranty,
     warrantyTime,
     warrantyExpiration,
@@ -37,10 +41,7 @@ exports.addVehicleService = async (req, res) => {
   } = req.body;
 
   try {
-    if (
-      !mongoose.isValidObjectId(vehicleId) ||
-      !mongoose.isValidObjectId(storeId)
-    ) {
+    if (!mongoose.isValidObjectId(vehicleId)) {
       return res
         .status(400)
         .json(ApiResponse({}, "Invalid vehicle or store ID", false));
@@ -53,15 +54,17 @@ exports.addVehicleService = async (req, res) => {
     }
 
     // Verify if the store exists
-    const store = await Store.findOne({ _id: storeId, userId });
-    if (!store) {
-      return res.status(404).json(ApiResponse({}, "Store not found", false));
-    }
+    // const store = await Store.findOne({ _id: storeId, userId });
+    // if (!store) {
+    //   return res.status(404).json(ApiResponse({}, "Store not found", false));
+    // }
 
     // Verify if the worker exists
-    const worker = await Worker.findOne({ _id: workerId, userId });
-    if (!worker) {
-      return res.status(404).json(ApiResponse({}, "Worker not found", false));
+    if (workerId) {
+      const worker = await Worker.findOne({ _id: workerId, userId });
+      if (!worker) {
+        return res.status(404).json(ApiResponse({}, "Worker not found", false));
+      }
     }
 
     let autoPartIdsParsed = [];
@@ -150,7 +153,8 @@ exports.addVehicleService = async (req, res) => {
     const vehicleService = new VehicleService({
       userId,
       vehicleId,
-      storeId,
+      // storeId,
+      location,
       serviceDate: serviceDateUTC,
       workerId,
       autoPartIds: autoPartIdsParsed,
@@ -162,6 +166,9 @@ exports.addVehicleService = async (req, res) => {
       repairPrice,
       partsCost,
       laborCost,
+      estimatedMaintenancePrice,
+      actualMaintenancePrice,
+      totalMaintenanceCost,
       warranty,
       warrantyTime,
       warrantyExpiration,
@@ -189,10 +196,9 @@ exports.updateVehicleService = async (req, res) => {
 
   const {
     vehicleId,
-    storeId,
+    // storeId,
     serviceDate,
     workerId,
-    partRepaired,
     description,
     partBrand,
     currentMileage,
@@ -200,12 +206,16 @@ exports.updateVehicleService = async (req, res) => {
     repairPrice,
     partsCost,
     laborCost,
+    estimatedMaintenancePrice,
+    actualMaintenancePrice,
+    totalMaintenanceCost,
     warranty,
     warrantyPrice,
     warrantyTime,
     warrantyExpiration,
     comment,
     autoPartIds,
+    location,
   } = req.body;
 
   try {
@@ -230,9 +240,9 @@ exports.updateVehicleService = async (req, res) => {
     if (vehicleId && !mongoose.isValidObjectId(vehicleId)) {
       return res.status(400).json(ApiResponse({}, "Invalid vehicle ID", false));
     }
-    if (storeId && !mongoose.isValidObjectId(storeId)) {
-      return res.status(400).json(ApiResponse({}, "Invalid store ID", false));
-    }
+    // if (storeId && !mongoose.isValidObjectId(storeId)) {
+    //   return res.status(400).json(ApiResponse({}, "Invalid store ID", false));
+    // }
     if (workerId && !mongoose.isValidObjectId(workerId)) {
       return res.status(400).json(ApiResponse({}, "Invalid worker ID", false));
     }
@@ -246,12 +256,12 @@ exports.updateVehicleService = async (req, res) => {
       }
     }
 
-    if (storeId) {
-      const store = await Store.findOne({ _id: storeId, userId });
-      if (!store) {
-        return res.status(404).json(ApiResponse({}, "Store not found", false));
-      }
-    }
+    // if (storeId) {
+    //   const store = await Store.findOne({ _id: storeId, userId });
+    //   if (!store) {
+    //     return res.status(404).json(ApiResponse({}, "Store not found", false));
+    //   }
+    // }
 
     if (workerId) {
       const worker = await Worker.findOne({ _id: workerId, userId });
@@ -323,10 +333,10 @@ exports.updateVehicleService = async (req, res) => {
 
     // Update fields
     vehicleService.vehicleId = vehicleId || vehicleService.vehicleId;
-    vehicleService.storeId = storeId || vehicleService.storeId;
+    // vehicleService.storeId = storeId || vehicleService.storeId;
     vehicleService.workerId = workerId || vehicleService.workerId;
     vehicleService.serviceDate = serviceDateUTC;
-    vehicleService.partRepaired = partRepaired ?? vehicleService.partRepaired;
+    vehicleService.location = location ?? vehicleService.location;
     vehicleService.description = description ?? vehicleService.description;
     vehicleService.partBrand = partBrand ?? vehicleService.partBrand;
     vehicleService.currentMileage =
@@ -335,6 +345,12 @@ exports.updateVehicleService = async (req, res) => {
     vehicleService.repairPrice = repairPrice ?? vehicleService.repairPrice;
     vehicleService.partsCost = partsCost ?? vehicleService.partsCost;
     vehicleService.laborCost = laborCost ?? vehicleService.laborCost;
+    vehicleService.estimatedMaintenancePrice =
+      estimatedMaintenancePrice ?? vehicleService.estimatedMaintenancePrice;
+    vehicleService.actualMaintenancePrice =
+      actualMaintenancePrice ?? vehicleService.actualMaintenancePrice;
+    vehicleService.totalMaintenanceCost =
+      totalMaintenanceCost ?? vehicleService.totalMaintenanceCost;
     vehicleService.warranty = warranty ?? vehicleService.warranty;
     vehicleService.warrantyPrice =
       warrantyPrice ?? vehicleService.warrantyPrice;
@@ -416,13 +432,13 @@ exports.getVehicleServices = async (req, res) => {
       });
     }
 
-    if (storeId) {
-      finalAggregate.push({
-        $match: {
-          storeId: new mongoose.Types.ObjectId(storeId),
-        },
-      });
-    }
+    // if (storeId) {
+    //   finalAggregate.push({
+    //     $match: {
+    //       storeId: new mongoose.Types.ObjectId(storeId),
+    //     },
+    //   });
+    // }
     if (startDate) {
       startDate = convertToUTCDate(startDate);
       finalAggregate.push({ $match: { serviceDate: { $gte: startDate } } });
@@ -442,27 +458,27 @@ exports.getVehicleServices = async (req, res) => {
       },
     });
 
-    finalAggregate.push({
-      $lookup: {
-        from: "stores",
-        localField: "storeId",
-        foreignField: "_id",
-        as: "store",
-      },
-    });
-    // lookup for mechanic
-    finalAggregate.push({
-      $lookup: {
-        from: "workers",
-        localField: "workerId",
-        foreignField: "_id",
-        as: "mechanic",
-      },
-    });
+    // finalAggregate.push({
+    //   $lookup: {
+    //     from: "stores",
+    //     localField: "storeId",
+    //     foreignField: "_id",
+    //     as: "store",
+    //   },
+    // });
+    // // lookup for mechanic
+    // finalAggregate.push({
+    //   $lookup: {
+    //     from: "workers",
+    //     localField: "workerId",
+    //     foreignField: "_id",
+    //     as: "mechanic",
+    //   },
+    // });
 
     finalAggregate.push({ $unwind: "$vehicle" });
-    finalAggregate.push({ $unwind: "$store" });
-    finalAggregate.push({ $unwind: "$mechanic" });
+    // finalAggregate.push({ $unwind: "$store" });
+    // finalAggregate.push({ $unwind: "$mechanic" });
 
     if (keyword) {
       finalAggregate.push({
@@ -477,8 +493,8 @@ exports.getVehicleServices = async (req, res) => {
                 $options: "i",
               },
             },
-            { "store.storeName": { $regex: keyword, $options: "i" } },
-            { "mechanic.name": { $regex: keyword, $options: "i" } },
+            // { "store.storeName": { $regex: keyword, $options: "i" } },
+            // { "mechanic.name": { $regex: keyword, $options: "i" } },
           ],
         },
       });
