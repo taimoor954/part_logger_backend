@@ -22,7 +22,7 @@ exports.addEquipment = async (req, res) => {
 
   const userId = req.user._id;
   try {
-    if (storeId) {
+    if (storeId ?? storeId) {
       const store = await Store.findOne({
         _id: storeId,
         userId,
