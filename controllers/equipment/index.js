@@ -6,7 +6,6 @@ const {
 } = require("../../helpers");
 const Equipment = require("../../models/Equipment");
 const Store = require("../../models/Store");
-const mongoose = require("mongoose");
 
 exports.addEquipment = async (req, res) => {
   const {
@@ -23,9 +22,7 @@ exports.addEquipment = async (req, res) => {
 
   const userId = req.user._id;
   try {
-    const isValidObjectId = mongoose.Types.ObjectId.isValid(storeId);
-
-    if (storeId && isValidObjectId) {
+    if (storeId !== "") {
       const store = await Store.findOne({
         _id: new mongoose.Types.ObjectId(storeId),
         userId,
@@ -35,6 +32,7 @@ exports.addEquipment = async (req, res) => {
         return res.status(404).json(ApiResponse({}, "Store not found", false));
       }
     }
+
     // Validate purchase date
     let purchaseDateUTC = null;
     if (purchaseDate) {
@@ -99,7 +97,7 @@ exports.addEquipment = async (req, res) => {
       warrantyExpiration,
       attachments,
       description,
-      storeId: storeId ?? storeId,
+      storeId: storeId !== "" ? storeId : null, // Handle null storeId
     });
 
     await equipment.save();
