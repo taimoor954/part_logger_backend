@@ -99,7 +99,7 @@ exports.addEquipment = async (req, res) => {
       warrantyExpiration,
       attachments,
       description,
-      storeId,
+      storeId: storeId ?? storeId,
     });
 
     await equipment.save();
