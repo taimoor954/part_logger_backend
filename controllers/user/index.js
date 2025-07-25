@@ -5,6 +5,7 @@ const moment = require("moment");
 const fs = require("fs");
 const Vehicle = require("../../models/Vehicle");
 const Store = require("../../models/Store");
+const { activateFreeTrial } = require("../payment");
 
 // Signup Controller
 exports.register = async (req, res) => {
@@ -34,7 +35,9 @@ exports.register = async (req, res) => {
       user.image = req.body.image;
     }
     const token = generateToken(user);
-    await user.save();
+    user = await user.save();
+
+    await activateFreeTrial(user._id);
     res
       .status(200)
       .json(

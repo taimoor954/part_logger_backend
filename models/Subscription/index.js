@@ -11,7 +11,7 @@ const subscriptionSchema = new Schema(
     },
     planType: {
       type: String,
-      enum: ["MONTHLY", "YEARLY"],
+      enum: ["MONTHLY", "YEARLY", "TRIAL"],
       required: true,
     },
     planCharges: {

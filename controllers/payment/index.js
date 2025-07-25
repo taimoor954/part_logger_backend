@@ -3,6 +3,52 @@ const Subscription = require("../../models/Subscription");
 const UserSubscription = require("../../models/UserSubscription");
 const moment = require("moment");
 
+exports.activateFreeTrial = async (userId) => {
+  try {
+    let freeTrialPlan = await Subscription.findOne({
+      planType: "TRIAL",
+    });
+
+    if (!freeTrialPlan) {
+      // Create the free trial plan if it doesn't exist
+      freeTrialPlan = new Subscription({
+        planName: "Free Trial",
+        planType: "TRIAL",
+        planCharges: 0,
+        vehicleLimit: 3,
+      });
+      await freeTrialPlan.save();
+    }
+
+    // Check if user already has a free trial subscription
+    const existingTrial = await UserSubscription.findOne({
+      userId,
+      subscriptionId: freeTrialPlan._id,
+    });
+    if (existingTrial) {
+      return res
+        .status(400)
+        .json(ApiResponse({}, "User already has a free trial.", false));
+    }
+
+    const now = moment().utc();
+    const expiresAt = now.clone().add(14, "days");
+
+    const userSubscription = new UserSubscription({
+      userId,
+      subscriptionId: freeTrialPlan._id,
+      subscribedAt: now.toDate(),
+      expiresAt: expiresAt.toDate(),
+    });
+
+    await userSubscription.save();
+
+    console.log("14-day free trial activated successfully.");
+  } catch (error) {
+    console.error("Error activating free trial:", error);
+  }
+};
+
 exports.savePayment = async (req, res) => {
   const { subscriptionId } = req.body;
   const userId = req.user.id;
