@@ -70,7 +70,7 @@ exports.addVehicleService = async (req, res) => {
     let autoPartIdsParsed = [];
     if (autoPartIds && autoPartIds.length > 0) {
       autoPartIdsParsed = JSON.parse(autoPartIds);
-      const autoParts = await AutoPart.find({
+      const autoParts = await VehicleService.find({
         _id: { $in: autoPartIdsParsed },
         userId,
       });
@@ -275,7 +275,7 @@ exports.updateVehicleService = async (req, res) => {
       let autoPartIdsParsed = JSON.parse(autoPartIds);
       // convert them to ObjectId
       console.log("Parsed autoPartIds:", autoPartIdsParsed);
-      const autoParts = await AutoPart.find({
+      const autoParts = await VehicleService.find({
         _id: { $in: autoPartIdsParsed },
         userId,
       });
