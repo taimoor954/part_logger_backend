@@ -22,14 +22,17 @@ exports.addEquipment = async (req, res) => {
 
   const userId = req.user._id;
   try {
-    const store = await Store.findOne({
-      _id: storeId,
-      userId,
-    });
+    if (storeId) {
+      const store = await Store.findOne({
+        _id: storeId,
+        userId,
+      });
 
-    if (!store) {
-      return res.status(404).json(ApiResponse({}, "Store not found", false));
+      if (!store) {
+        return res.status(404).json(ApiResponse({}, "Store not found", false));
+      }
     }
+
     // Validate purchase date
     let purchaseDateUTC = null;
     if (purchaseDate) {
