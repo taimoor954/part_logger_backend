@@ -6,6 +6,7 @@ const {
 } = require("../../helpers");
 const Equipment = require("../../models/Equipment");
 const Store = require("../../models/Store");
+const mongoose = require("mongoose");
 
 exports.addEquipment = async (req, res) => {
   const {
@@ -22,9 +23,10 @@ exports.addEquipment = async (req, res) => {
 
   const userId = req.user._id;
   try {
-    if (storeId ?? storeId) {
+    console.log(storeId);
+    if (storeId) {
       const store = await Store.findOne({
-        _id: storeId,
+        _id: new mongoose.Types.ObjectId(storeId),
         userId,
       });
 
