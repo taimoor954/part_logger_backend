@@ -17,6 +17,7 @@ exports.addVehicleService = async (req, res) => {
   const userId = req.user._id;
   const {
     vehicleId,
+    partName,
     // storeId,
     location,
     serviceDate,
@@ -152,6 +153,7 @@ exports.addVehicleService = async (req, res) => {
     // Create the vehicle service
     const vehicleService = new VehicleService({
       userId,
+      partName,
       vehicleId,
       // storeId,
       location,
@@ -201,6 +203,7 @@ exports.updateVehicleService = async (req, res) => {
     workerId,
     description,
     partBrand,
+    partName,
     currentMileage,
     condition,
     repairPrice,
@@ -334,6 +337,7 @@ exports.updateVehicleService = async (req, res) => {
     // Update fields
     vehicleService.vehicleId = vehicleId || vehicleService.vehicleId;
     // vehicleService.storeId = storeId || vehicleService.storeId;
+    vehicleService.partName = partName || vehicleService.partName;
     vehicleService.workerId = workerId || vehicleService.workerId;
     vehicleService.serviceDate = serviceDateUTC;
     vehicleService.location = location ?? vehicleService.location;

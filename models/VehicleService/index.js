@@ -33,6 +33,10 @@ const vehicleServiceSchema = new Schema(
       ref: "Worker",
       default: null,
     },
+    partName: {
+      type: String,
+      default: "",
+    },
     autoPartIds: {
       type: [Schema.Types.ObjectId],
       ref: "AutoPart",
