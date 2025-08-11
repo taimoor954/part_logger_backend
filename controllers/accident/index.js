@@ -308,6 +308,7 @@ exports.getAccidentsByIds = async (req, res) => {
         description: 1,
         attachments: 1,
         vehicleDetails: "$vehicle.vehicleDetails",
+        involvedCarDetails: 1,
         createdAt: 1,
         updatedAt: 1,
       },
