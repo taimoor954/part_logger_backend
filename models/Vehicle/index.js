@@ -32,7 +32,7 @@ const vehicleDetailsSchema = new Schema(
     },
     warranty: {
       type: String,
-      enum: ["NO", "YES"],
+      enum: ["NO", "YES", "N/A"],
     },
   },
   { timestamps: true }
