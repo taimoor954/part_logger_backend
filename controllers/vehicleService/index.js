@@ -331,7 +331,7 @@ exports.updateVehicleService = async (req, res) => {
     vehicleService.attachments = handleFileOperations(
       vehicleService.attachments,
       req.files?.gallery,
-      req.query?.deletedImages
+      req.body?.deletedImages
     );
 
     // Update fields
