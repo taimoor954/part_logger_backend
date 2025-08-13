@@ -51,7 +51,7 @@ exports.addGasExpense = async (req, res) => {
     const attachments = handleFileOperations(
       draft?.attachments ? draft.attachments : [],
       req.files?.gallery,
-      req.query?.deletedImages
+      req.body?.deletedImages
     );
 
     const gas = new Gas({
